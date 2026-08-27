@@ -1,0 +1,11 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: config-server
+
+# Configure git or filesystem backend for centralized configuration
+
+logging:
+  level:
+    root: INFO
