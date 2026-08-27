@@ -1,0 +1,22 @@
+server:
+  port: 8087
+spring:
+  application:
+    name: notification-service
+
+# SMTP settings example (configurar en environment variables para producción)
+spring:
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: user
+    password: pass
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+logging:
+  level:
+    root: INFO
