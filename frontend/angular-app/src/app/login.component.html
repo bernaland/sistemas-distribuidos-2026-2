@@ -1,0 +1,17 @@
+<div class="login-container">
+  <h2 class="login-title">Bienvenidos a la Tienda Genérica</h2>
+
+  <div class="form-row">
+    <label>Usuario</label>
+    <input class="input" [(ngModel)]="username" />
+  </div>
+  <div class="form-row">
+    <label>Contraseña</label>
+    <input class="input" type="password" [(ngModel)]="password" />
+  </div>
+
+  <div class="center">
+    <button class="button" (click)="accept()">Aceptar</button>
+    <button class="button secondary" (click)="cancel()">Cancelar</button>
+  </div>
+</div>

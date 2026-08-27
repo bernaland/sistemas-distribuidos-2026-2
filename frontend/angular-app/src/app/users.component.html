@@ -1,0 +1,26 @@
+<div>
+  <h3>Usuarios</h3>
+  <div class="form-row">
+    <label>Cédula</label>
+    <input class="input" [(ngModel)]="cedula" />
+    <label>Usuario</label>
+    <input class="input" [(ngModel)]="usuario" />
+  </div>
+  <div class="form-row">
+    <label>Nombre Completo</label>
+    <input class="input" [(ngModel)]="nombre" />
+    <label>Contraseña</label>
+    <input class="input" type="password" [(ngModel)]="contrasena" />
+  </div>
+  <div class="form-row">
+    <label>Correo Electrónico</label>
+    <input class="input" [(ngModel)]="correo" />
+  </div>
+
+  <div class="center">
+    <button class="button" (click)="consultar()">Consultar</button>
+    <button class="button" (click)="crear()">Crear</button>
+    <button class="button" (click)="actualizar()">Actualizar</button>
+    <button class="button" (click)="borrar()">Borrar</button>
+  </div>
+</div>
