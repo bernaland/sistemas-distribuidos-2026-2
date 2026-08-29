@@ -31,6 +31,8 @@ frontend/
                 organisms/  # Componentes que agrupan molecules y atoms cuando es necesario
                 pages/      # Componentes que implementan la logica de negocio sobre un template
                 templates/  # Plantillas que deben ser utilizadas para crear las paginas, definen el esqueleto y utilizan organisms y molecules
+        test/               # Pruebas unitarias para el front-end
 services/
     {service-name}/
         src/                # Codigo fuente del servicio
+        test/               # Pruebas unitarias para el servicio
