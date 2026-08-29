@@ -1,0 +1,27 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    root: INFO
+
+app:
+  security:
+    issuer: http://localhost:8081
+    service-client-id: user-service-client
+    service-client-secret: service-secret-123456
+    web-client-id: user-service-web-client
+    web-client-secret: web-secret-123456
+    web-client-redirect-uri: http://127.0.0.1:8080/login/oauth2/code/user-service-web-client

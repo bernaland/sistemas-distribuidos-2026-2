@@ -1,5 +1,8 @@
 {
     "chat.tools.terminal.autoApprove": {
         "New-Item": true
+    },
+    "chat.instructionsFilesLocations": {
+        ".copilot/instructions": true
     }
 }
