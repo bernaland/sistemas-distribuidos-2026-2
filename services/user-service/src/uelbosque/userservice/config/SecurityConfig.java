@@ -1,4 +1,4 @@
-package com.uelbosque.userservice.config;
+package uelbosque.userservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

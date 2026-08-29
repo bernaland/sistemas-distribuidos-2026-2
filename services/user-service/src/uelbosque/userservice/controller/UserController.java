@@ -1,7 +1,7 @@
-package com.uelbosque.userservice.controller;
+package uelbosque.userservice.controller;
 
-import com.uelbosque.userservice.model.User;
-import com.uelbosque.userservice.service.UserService;
+import uelbosque.userservice.model.User;
+import uelbosque.userservice.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

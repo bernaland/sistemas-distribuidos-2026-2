@@ -1,7 +1,7 @@
-package com.uelbosque.userservice;
+package uelbosque.userservice;
 
-import com.uelbosque.userservice.model.User;
-import com.uelbosque.userservice.repository.UserRepository;
+import uelbosque.userservice.model.User;
+import uelbosque.userservice.repository.UserRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;

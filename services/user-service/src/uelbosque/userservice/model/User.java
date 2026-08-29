@@ -1,4 +1,4 @@
-package com.uelbosque.userservice.model;
+package uelbosque.userservice.model;
 
 import jakarta.persistence.*;
 

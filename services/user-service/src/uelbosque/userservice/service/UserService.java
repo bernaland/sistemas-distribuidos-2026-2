@@ -1,7 +1,7 @@
-package com.uelbosque.userservice.service;
+package uelbosque.userservice.service;
 
-import com.uelbosque.userservice.model.User;
-import com.uelbosque.userservice.repository.UserRepository;
+import uelbosque.userservice.model.User;
+import uelbosque.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
