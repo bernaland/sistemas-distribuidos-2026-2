@@ -4,5 +4,6 @@
     },
     "chat.instructionsFilesLocations": {
         ".copilot/instructions": true
-    }
+    },
+    "java.compile.nullAnalysis.mode": "automatic"
 }
