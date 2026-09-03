@@ -100,6 +100,41 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/products/categories debe retornar 200 y la lista de categorías")
+    void shouldReturnCategories() throws Exception {
+        when(service.getCategories()).thenReturn(List.of("Abarrotes", "Bebidas"));
+
+        mockMvc.perform(get("/api/products/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("Abarrotes"))
+                .andExpect(jsonPath("$[1]").value("Bebidas"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/products/{id} debe retornar 200 y el producto actualizado")
+    void shouldUpdateProduct() throws Exception {
+        ProductRequestDto req = new ProductRequestDto();
+        req.setCode("P001");
+        req.setName("Arroz Premium");
+        req.setDescription("Arroz 1kg");
+        req.setPurchasePrice(new BigDecimal("3200.00"));
+        req.setSalePrice(new BigDecimal("4200.00"));
+        req.setIvaRate(new BigDecimal("19.00"));
+
+        ProductResponseDto res = new ProductResponseDto(1L, "P001", "Arroz Premium", "Arroz 1kg",
+                new BigDecimal("3200.00"), new BigDecimal("4200.00"),
+                new BigDecimal("19.00"), null, null, true);
+
+        when(service.updateProduct(eq(1L), any(ProductRequestDto.class))).thenReturn(res);
+
+        mockMvc.perform(put("/api/products/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Arroz Premium"));
+    }
+
+    @Test
     @DisplayName("DELETE /api/products/{id} debe retornar 204 No Content")
     void shouldDeleteProduct() throws Exception {
         mockMvc.perform(delete("/api/products/1"))

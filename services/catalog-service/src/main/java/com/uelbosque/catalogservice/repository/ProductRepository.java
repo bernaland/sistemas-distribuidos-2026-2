@@ -15,4 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategoryIgnoreCaseAndActiveTrue(String category);
     List<Product> findByNameContainingIgnoreCaseAndActiveTrue(String name);
     boolean existsByCode(String code);
+
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT p.category FROM Product p WHERE p.active = true AND p.category IS NOT NULL AND p.category <> ''")
+    List<String> findDistinctCategories();
 }

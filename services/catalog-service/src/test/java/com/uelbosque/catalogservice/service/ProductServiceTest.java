@@ -117,4 +117,40 @@ class ProductServiceTest {
         assertFalse(sampleProduct.isActive());
         verify(repository, times(1)).save(sampleProduct);
     }
+
+    @Test
+    @DisplayName("Debe listar las categorías únicas disponibles")
+    void shouldListDistinctCategories() {
+        when(repository.findDistinctCategories()).thenReturn(List.of("Abarrotes", "Lácteos"));
+
+        List<String> categories = service.getCategories();
+
+        assertEquals(2, categories.size());
+        assertTrue(categories.contains("Abarrotes"));
+        assertTrue(categories.contains("Lácteos"));
+    }
+
+    @Test
+    @DisplayName("Debe obtener un producto por código cuando existe y está activo")
+    void shouldGetProductByCode() {
+        when(repository.findByCodeAndActiveTrue("P001")).thenReturn(Optional.of(sampleProduct));
+
+        ProductResponseDto response = service.getProductByCode("P001");
+
+        assertNotNull(response);
+        assertEquals("P001", response.getCode());
+    }
+
+    @Test
+    @DisplayName("Debe actualizar un producto existente correctamente")
+    void shouldUpdateProductSuccessfully() {
+        when(repository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+        when(repository.save(any(Product.class))).thenReturn(sampleProduct);
+
+        sampleDto.setName("Arroz Modificado");
+        ProductResponseDto response = service.updateProduct(1L, sampleDto);
+
+        assertNotNull(response);
+        verify(repository, times(1)).save(any(Product.class));
+    }
 }

@@ -81,6 +81,11 @@ public class ProductService {
         return getAllProducts();
     }
 
+    @Transactional(readOnly = true)
+    public List<String> getCategories() {
+        return repository.findDistinctCategories();
+    }
+
     private void applyDtoToProduct(Product product, ProductRequestDto dto) {
         product.setCode(dto.getCode());
         product.setName(dto.getName());
