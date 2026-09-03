@@ -6,37 +6,37 @@ import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 
 // Atoms
-import { ButtonAtom } from './atoms/button.atom';
-import { InputAtom } from './atoms/input.atom';
-import { LabelAtom } from './atoms/label.atom';
-import { TopbarAtom } from './atoms/topbar.atom';
+import { ButtonAtom, InputAtom, LabelAtom, TopbarAtom } from './atoms';
 
 // Molecules
-import { NavTabsMolecule } from './molecules/nav-tabs.molecule';
-import { FormRowMolecule } from './molecules/form-row.molecule';
+import { NavTabsMolecule, FormRowMolecule } from './molecules';
 
 // Organisms
-import { LoginOrganism } from './organisms/login.organism';
-import { UsersOrganism } from './organisms/users.organism';
-import { ClientsOrganism } from './organisms/clients.organism';
-import { ProvidersOrganism } from './organisms/providers.organism';
-import { ProductsOrganism } from './organisms/products.organism';
-import { SalesOrganism } from './organisms/sales.organism';
-import { ReportsOrganism } from './organisms/reports.organism';
-import { DashboardOrganism } from './organisms/dashboard.organism';
+import {
+  LoginOrganism,
+  UsersOrganism,
+  ClientsOrganism,
+  ProvidersOrganism,
+  ProductsOrganism,
+  SalesOrganism,
+  ReportsOrganism,
+  DashboardOrganism
+} from './organisms';
 
 // Templates
-import { MainLayoutTemplate } from './templates/main-layout.template';
+import { MainLayoutTemplate } from './templates';
 
 // Pages
-import { LoginPage } from './pages/login.page';
-import { UsersPage } from './pages/users.page';
-import { ClientsPage } from './pages/clients.page';
-import { ProvidersPage } from './pages/providers.page';
-import { ProductsPage } from './pages/products.page';
-import { SalesPage } from './pages/sales.page';
-import { ReportsPage } from './pages/reports.page';
-import { DashboardPage } from './pages/dashboard.page';
+import {
+  LoginPage,
+  UsersPage,
+  ClientsPage,
+  ProvidersPage,
+  ProductsPage,
+  SalesPage,
+  ReportsPage,
+  DashboardPage
+} from './pages';
 
 
 @NgModule({

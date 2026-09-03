@@ -1,17 +1,4 @@
-:root{--muted:#777;--accent:#888}
-body{font-family: Arial, Helvetica, sans-serif}
-.top-bar{background:#f2f2f2;padding:8px 12px;color:var(--muted)}
-.header{background:#bdbdbd;padding:10px 12px;font-weight:600}
-.tabs{background:#fff;padding:6px 12px;border-bottom:1px solid #ddd}
-.tabs a{margin-right:12px;color:var(--muted);text-decoration:none;padding:6px 8px;border-radius:4px}
-.tabs a.active{background:#efefef;color:#000;border:1px solid #ccc}
-.content{padding:24px}
-
-.form-row{display:flex;gap:24px;margin-bottom:12px;align-items:center}
-.form-row label{width:140px;color:var(--muted)}
-.input{padding:6px;border:1px solid #ccc;border-radius:4px;width:220px}
-.button{background:#8a8a8a;color:white;padding:10px 20px;border-radius:6px;border:none;margin-right:10px;cursor:pointer}
-.button.secondary{background:#bdbdbd;color:#333}
-.center{display:flex;justify-content:center;margin-top:18px}
-.login-container{max-width:600px;margin:60px auto;text-align:left}
-.login-title{text-align:center;color:#999;margin-bottom:24px}
+:host {
+  display: block;
+  min-height: 100vh;
+}
