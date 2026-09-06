@@ -1,26 +1,45 @@
 # user-service
 
-Microservicio responsable de la gestión de usuarios y proveedor de identidad OAuth2/OpenID Connect.
+Microservicio responsable de la gestión de usuarios, registro, perfiles y autenticación con tokens JWT.
 
-Arranque rápido:
-- Requisitos: JDK 17, Maven
-- Ejecutar: mvn spring-boot:run
+## Requisitos
+- JDK 17
+- Apache Maven 3.8+
 
-Usuario inicial:
-- username: `admininicial`
-- password: `admin123456`
+## Configuración y Puertos
+- **Puerto:** `8081`
+- **Base de datos:** H2 en memoria para desarrollo local (`jdbc:h2:mem:userdb`) y consola en `/h2-console` (usuario `sa`, sin contraseña). Soporta PostgreSQL en producción (`org.postgresql:postgresql` incluido en `pom.xml`).
 
-OAuth2/OIDC (Identity Provider):
-- Metadata OIDC: `/.well-known/openid-configuration`
-- JWK Set: `/oauth2/jwks`
-- Token endpoint: `/oauth2/token`
-- Authorization endpoint: `/oauth2/authorize`
+## Usuarios Iniciales Sembrados
+- **Administrador:**
+  - Username: `admininicial`
+  - Password: `admin123456`
+  - Roles: `ROLE_ADMIN,ROLE_USER`
+  - Email: `admin@uelbosque.edu.co`
+- **Usuario estándar:**
+  - Username: `userinicial`
+  - Password: `user123456`
+  - Roles: `ROLE_USER`
+  - Email: `user@uelbosque.edu.co`
 
-Clientes registrados por defecto:
-- `user-service-client` (client_credentials, scopes: `users.read`, `users.write`)
-- `user-service-web-client` (authorization_code + refresh_token, scopes: `openid`, `profile`, `users.read`, `users.write`)
+## Endpoints REST (`/api/users`)
 
-Endpoints protegidos (Bearer JWT):
-- `GET /api/users` requiere scope `users.read`
-- `GET /api/users/{username}` requiere scope `users.read`
-- `POST /api/users` requiere scope `users.write`
+| Método | Endpoint | Descripción | Autenticación |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/users` | Registrar nuevo usuario | Pública |
+| `POST` | `/api/users/login` | Login y obtención de token JWT | Pública |
+| `GET` | `/api/users` | Listar todos los usuarios | Requiere Token |
+| `GET` | `/api/users/{id}` | Consultar usuario por ID | Requiere Token |
+| `GET` | `/api/users/username/{username}` | Consultar usuario por username | Requiere Token |
+| `PUT` | `/api/users/{id}` | Actualizar datos del usuario | Requiere Token |
+| `DELETE` | `/api/users/{id}` | Eliminar usuario | Requiere Token |
+
+## Ejecución y Pruebas
+
+```powershell
+# Ejecutar pruebas unitarias y de integración
+mvn clean test -f services/user-service/pom.xml
+
+# Iniciar el microservicio
+mvn spring-boot:run -f services/user-service/pom.xml
+```
