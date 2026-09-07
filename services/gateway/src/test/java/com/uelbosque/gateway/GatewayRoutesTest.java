@@ -33,6 +33,9 @@ class GatewayRoutesTest {
         assertTrue(routes.stream().anyMatch(r -> r.getId().equals("catalog-service")));
         assertTrue(routes.stream().anyMatch(r -> r.getId().equals("cart-service")));
         assertTrue(routes.stream().anyMatch(r -> r.getId().equals("order-service")));
+        for (String id : List.of("customer-service", "supplier-service", "inventory-service", "payment-service", "notification-service", "admin-service")) {
+            assertTrue(routes.stream().anyMatch(r -> r.getId().equals(id)), id);
+        }
     }
 
     @Test

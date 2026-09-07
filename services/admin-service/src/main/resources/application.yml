@@ -1,9 +1,21 @@
 server:
   port: 8088
 spring:
+  cloud:
+    config:
+      enabled: ${CONFIG_ENABLED:false}
   application:
     name: admin-service
-
-logging:
-  level:
-    root: INFO
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 900000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

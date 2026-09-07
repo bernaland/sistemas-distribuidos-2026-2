@@ -66,6 +66,15 @@ public class Cart {
         recalculateTotals();
     }
 
+    public void addItem(String code,String name,BigDecimal price,int quantity,BigDecimal ivaRate) {
+        addItem(code,name,price,quantity);
+        CartItem item=findItem(code).orElseThrow();
+        item.setProductName(name);
+        item.setUnitPrice(price);
+        item.setIvaRate(ivaRate);
+        recalculateTotals();
+    }
+
     public void updateQuantity(String productCode, int quantity) {
         if (quantity <= 0) {
             removeItem(productCode);
@@ -96,7 +105,7 @@ public class Cart {
                 .map(CartItem::getItemSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
-        this.taxTotal = this.subtotal.multiply(this.taxRate).setScale(2, RoundingMode.HALF_UP);
+        this.taxTotal = items.stream().map(CartItem::getItemTax).reduce(BigDecimal.ZERO,BigDecimal::add).setScale(2,RoundingMode.HALF_UP);
         BigDecimal totalBeforeDiscount = this.subtotal.add(this.taxTotal);
         this.grandTotal = totalBeforeDiscount.subtract(this.discountTotal).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
         this.updatedAt = LocalDateTime.now();

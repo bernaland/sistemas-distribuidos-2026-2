@@ -6,6 +6,9 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "products")
 public class Product {
+    private String supplierNit;
+    public String getSupplierNit() { return supplierNit; }
+    public void setSupplierNit(String supplierNit) { this.supplierNit = supplierNit; }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

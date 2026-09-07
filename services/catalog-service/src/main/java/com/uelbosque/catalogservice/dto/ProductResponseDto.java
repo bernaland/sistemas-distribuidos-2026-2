@@ -3,6 +3,9 @@ package com.uelbosque.catalogservice.dto;
 import java.math.BigDecimal;
 
 public class ProductResponseDto {
+    private String supplierNit;
+    public String getSupplierNit() { return supplierNit; }
+    public void setSupplierNit(String supplierNit) { this.supplierNit = supplierNit; }
 
     private Long id;
     private String code;

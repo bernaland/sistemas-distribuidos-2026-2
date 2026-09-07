@@ -3,9 +3,19 @@ server:
 spring:
   application:
     name: config-server
-
-# Configure git or filesystem backend for centralized configuration
-
-logging:
-  level:
-    root: INFO
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+  security:
+    user:
+      name: config
+      password: ${CONFIG_PASSWORD}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

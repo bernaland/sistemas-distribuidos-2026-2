@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@org.springframework.security.test.context.support.WithMockUser(roles="ADMIN")
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters=false)
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
 
@@ -79,6 +81,7 @@ class ProductControllerTest {
     @DisplayName("POST /api/products debe retornar 201 y el producto creado")
     void shouldCreateProduct() throws Exception {
         ProductRequestDto req = new ProductRequestDto();
+        req.setSupplierNit("123");
         req.setCode("P002");
         req.setName("Frijol");
         req.setDescription("Frijol bola roja");
@@ -114,6 +117,7 @@ class ProductControllerTest {
     @DisplayName("PUT /api/products/{id} debe retornar 200 y el producto actualizado")
     void shouldUpdateProduct() throws Exception {
         ProductRequestDto req = new ProductRequestDto();
+        req.setSupplierNit("123");
         req.setCode("P001");
         req.setName("Arroz Premium");
         req.setDescription("Arroz 1kg");

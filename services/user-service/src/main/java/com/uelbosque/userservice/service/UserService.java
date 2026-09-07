@@ -33,6 +33,7 @@ public class UserService {
     }
 
     public UserResponse createUser(CreateUserRequest request) {
+        validateCedula(request.getCedula());
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateResourceException("El nombre de usuario ya está en uso");
         }
@@ -41,6 +42,7 @@ public class UserService {
         }
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = new User(request.getUsername(), encodedPassword, request.getName(), request.getEmail(), request.getRoles());
+        user.setCedula(request.getCedula());
         return toResponse(userRepository.save(user));
     }
 
@@ -93,6 +95,8 @@ public class UserService {
     }
 
     private void applyUserUpdates(User user, UpdateUserRequest request) {
+        updateUsername(user, request.getUsername());
+        protectLastAdmin(user, request);
         if (StringUtils.hasText(request.getName())) user.setName(request.getName());
         if (StringUtils.hasText(request.getEmail())) user.setEmail(request.getEmail());
         if (StringUtils.hasText(request.getPassword())) user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -103,10 +107,38 @@ public class UserService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
+        UpdateUserRequest update = new UpdateUserRequest();
+        update.setEnabled(false);
+        protectLastAdmin(user, update);
         userRepository.delete(user);
     }
 
+    private void validateCedula(String cedula) {
+        if (cedula == null || !cedula.matches("[0-9]{1,20}")) throw new IllegalArgumentException("Cedula obligatoria");
+        if (userRepository.existsByCedula(cedula)) throw new DuplicateResourceException("Cedula ya registrada");
+    }
+    @Transactional(readOnly=true)
+    public UserResponse getUserByCedula(String cedula) {
+        return toResponse(userRepository.findByCedula(cedula)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario inexistente")));
+    }
+    private void updateUsername(User user, String username) {
+        if (username == null) return;
+        if (!username.equals(user.getUsername()) && userRepository.existsByUsername(username))
+            throw new DuplicateResourceException("Usuario ya registrado");
+        user.setUsername(username);
+    }
+    private void protectLastAdmin(User user, UpdateUserRequest request) {
+        boolean removesAdmin = Boolean.FALSE.equals(request.getEnabled()) ||
+            (request.getRoles() != null && !request.getRoles().contains("ROLE_ADMIN"));
+        if (!user.isEnabled() || !user.getRoles().contains("ROLE_ADMIN") || !removesAdmin) return;
+        boolean replacement = userRepository.findAll().stream().anyMatch(u -> !u.getId().equals(user.getId())
+            && u.isEnabled() && u.getRoles().contains("ROLE_ADMIN"));
+        if (!replacement) throw new DuplicateResourceException("Debe conservar un administrador activo");
+    }
     public UserResponse toResponse(User user) {
-        return new UserResponse(user.getId(), user.getUsername(), user.getName(), user.getEmail(), user.getRoles(), user.isEnabled());
+        UserResponse response = new UserResponse(user.getId(), user.getUsername(), user.getName(), user.getEmail(), user.getRoles(), user.isEnabled());
+        response.setCedula(user.getCedula());
+        return response;
     }
 }

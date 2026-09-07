@@ -4,6 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
 public class UpdateUserRequest {
+    @jakarta.validation.constraints.Size(min=4,max=50) private String username;
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username=username; }
 
     @Size(max = 100, message = "El nombre no debe superar 100 caracteres")
     private String name;
@@ -14,6 +17,7 @@ public class UpdateUserRequest {
     @Size(min = 6, max = 100, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
+    @jakarta.validation.constraints.Pattern(regexp="ROLE_(ADMIN|USER)(,ROLE_(ADMIN|USER))*")
     private String roles;
 
     private Boolean enabled;
