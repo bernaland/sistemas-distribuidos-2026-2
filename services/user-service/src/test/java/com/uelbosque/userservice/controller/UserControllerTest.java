@@ -54,6 +54,7 @@ class UserControllerTest {
     @DisplayName("POST /api/users debe registrar un usuario y retornar 201")
     void shouldRegisterUserSuccessfully() throws Exception {
         CreateUserRequest req = new CreateUserRequest("jdoe", "secret123", "John Doe", "jdoe@example.com", "ROLE_USER");
+        req.setCedula("123456");
         UserResponse res = new UserResponse(1L, "jdoe", "John Doe", "jdoe@example.com", "ROLE_USER", true);
         when(userService.createUser(any(CreateUserRequest.class))).thenReturn(res);
 
@@ -69,6 +70,7 @@ class UserControllerTest {
     @DisplayName("POST /api/users con campos vacíos debe retornar 400 Bad Request")
     void shouldReturnBadRequestWhenInvalid() throws Exception {
         CreateUserRequest req = new CreateUserRequest("", "", "", "invalid-email", "");
+        req.setCedula("123456");
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)

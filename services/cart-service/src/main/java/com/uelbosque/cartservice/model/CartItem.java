@@ -16,6 +16,9 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
+    @Column(precision=5,scale=2) private BigDecimal ivaRate=new BigDecimal("19");
+    public void setIvaRate(BigDecimal rate) { this.ivaRate=rate; }
+    public BigDecimal getItemTax() { return itemSubtotal.multiply(ivaRate).divide(new BigDecimal("100"),2,java.math.RoundingMode.HALF_UP); }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

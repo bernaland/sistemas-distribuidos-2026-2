@@ -19,8 +19,10 @@ import java.util.List;
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final com.uelbosque.cartservice.CatalogReader catalog;
 
-    public CartService(CartRepository cartRepository) {
+    public CartService(CartRepository cartRepository, com.uelbosque.cartservice.CatalogReader catalog) {
+        this.catalog=catalog;
         this.cartRepository = cartRepository;
     }
 
@@ -33,14 +35,15 @@ public class CartService {
     public CartResponse addItem(String userId, AddItemRequest request) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> new Cart(userId));
-        cart.addItem(request.getProductCode(), request.getProductName(), request.getUnitPrice(), request.getQuantity());
+        var product=catalog.get(request.getProductCode());
+        cart.addItem(product.code(), product.name(), product.salePrice(), request.getQuantity(), product.ivaRate());
         return toResponse(cartRepository.save(cart));
     }
 
     public CartResponse updateItemQuantity(String userId, String productCode, UpdateQuantityRequest request) {
         Cart cart = findCartOrThrow(userId);
         if (cart.findItem(productCode).isEmpty()) {
-            throw new ResourceNotFoundException("El producto " + productCode + " no está en el carrito");
+            throw new ResourceNotFoundException("El producto " + productCode + " no estÃƒÆ’Ã‚Â¡ en el carrito");
         }
         cart.updateQuantity(productCode, request.getQuantity());
         return toResponse(cartRepository.save(cart));

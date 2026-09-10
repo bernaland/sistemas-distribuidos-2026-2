@@ -1,6 +1,9 @@
 package com.uelbosque.userservice.dto;
 
 public class UserResponse {
+    private String cedula;
+    public String getCedula() { return cedula; }
+    public void setCedula(String cedula) { this.cedula=cedula; }
 
     private Long id;
     private String username;

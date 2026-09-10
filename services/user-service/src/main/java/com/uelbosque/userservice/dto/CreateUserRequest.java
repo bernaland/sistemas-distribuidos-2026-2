@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public class CreateUserRequest {
+    @NotBlank @jakarta.validation.constraints.Pattern(regexp="[0-9]{1,20}") private String cedula;
+    public String getCedula() { return cedula; }
+    public void setCedula(String cedula) { this.cedula=cedula; }
 
     @NotBlank(message = "El nombre de usuario es requerido")
     @Size(min = 4, max = 50, message = "El nombre de usuario debe tener entre 4 y 50 caracteres")
@@ -22,6 +25,7 @@ public class CreateUserRequest {
     @Email(message = "El formato de correo electr坦nico no es v叩lido")
     private String email;
 
+    @jakarta.validation.constraints.Pattern(regexp="ROLE_(ADMIN|USER)(,ROLE_(ADMIN|USER))*")
     private String roles;
 
     public CreateUserRequest() {}

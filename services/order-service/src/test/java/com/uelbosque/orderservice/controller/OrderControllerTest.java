@@ -29,6 +29,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@org.springframework.security.test.context.support.WithMockUser(roles="ADMIN")
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters=false)
 @WebMvcTest(OrderController.class)
 @Import(GlobalExceptionHandler.class)
 class OrderControllerTest {

@@ -48,6 +48,9 @@ public class UserController {
         return ResponseEntity.ok(userService.listUsers());
     }
 
+    @GetMapping("/cedula/{cedula}")
+    public UserResponse getByCedula(@PathVariable String cedula) { return userService.getUserByCedula(cedula); }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));

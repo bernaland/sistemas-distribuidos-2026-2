@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceTest {
+    @Mock com.uelbosque.cartservice.CatalogReader catalog;
 
     @Mock
     private CartRepository cartRepository;
@@ -65,10 +66,11 @@ class CartServiceTest {
     @Test
     @DisplayName("Debe agregar item al carrito y calcular subtotal e IVA correctamente")
     void shouldAddItemAndCalculateTotals() {
-        AddItemRequest req = new AddItemRequest("P001", "Arroz 1kg", new BigDecimal("1000.00"), 2);
+        AddItemRequest req = new AddItemRequest("P001", "Precio manipulado", new BigDecimal("1.00"), 2);
         when(cartRepository.findByUserId("user123")).thenReturn(Optional.of(sampleCart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> inv.getArgument(0));
 
+        when(catalog.get("P001")).thenReturn(new com.uelbosque.cartservice.CatalogReader.Product("P001","Arroz 1kg",new BigDecimal("1000.00"),new BigDecimal("19"),true));
         CartResponse res = cartService.addItem("user123", req);
 
         assertNotNull(res);
@@ -79,13 +81,14 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("Debe acumular cantidad si el producto ya está en el carrito")
+    @DisplayName("Debe acumular cantidad si el producto ya estÃ¡ en el carrito")
     void shouldAccumulateQuantityForExistingProduct() {
         sampleCart.addItem("P001", "Arroz 1kg", new BigDecimal("1000.00"), 1);
         AddItemRequest req = new AddItemRequest("P001", "Arroz 1kg", new BigDecimal("1000.00"), 3);
         when(cartRepository.findByUserId("user123")).thenReturn(Optional.of(sampleCart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> inv.getArgument(0));
 
+        when(catalog.get("P001")).thenReturn(new com.uelbosque.cartservice.CatalogReader.Product("P001","Arroz 1kg",new BigDecimal("1000.00"),new BigDecimal("19"),true));
         CartResponse res = cartService.addItem("user123", req);
 
         assertEquals(1, res.getItems().size());
@@ -122,7 +125,7 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar excepción si se intenta actualizar un item que no existe")
+    @DisplayName("Debe lanzar excepciÃ³n si se intenta actualizar un item que no existe")
     void shouldThrowWhenUpdatingNonExistentItem() {
         UpdateQuantityRequest req = new UpdateQuantityRequest(3);
         when(cartRepository.findByUserId("user123")).thenReturn(Optional.of(sampleCart));

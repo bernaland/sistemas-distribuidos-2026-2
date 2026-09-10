@@ -21,8 +21,10 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
+    private final com.uelbosque.userservice.repository.UserRepository users;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, com.uelbosque.userservice.repository.UserRepository users) {
+        this.users=users;
         this.tokenProvider = tokenProvider;
     }
 
@@ -38,7 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void authenticate(HttpServletRequest request, String token) {
         String username = tokenProvider.getUsernameFromToken(token);
-        String roles = tokenProvider.getRolesFromToken(token);
+        var user = users.findByUsername(username);
+        if (user.isEmpty() || !user.get().isEnabled()) return;
+        String roles = user.get().getRoles();
         List<GrantedAuthority> authorities = Arrays.stream(roles.split(","))
                 .map(String::trim)
                 .filter(StringUtils::hasText)

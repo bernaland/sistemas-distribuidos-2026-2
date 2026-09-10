@@ -7,7 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@AutoConfigureWebTestClient
 class GatewayCorsTest {
 
     @Autowired
@@ -16,7 +17,7 @@ class GatewayCorsTest {
     @Test
     @DisplayName("Debe responder con cabeceras CORS válidas para el origen Angular")
     void shouldAllowCorsForAngularOrigin() {
-        webTestClient.options().uri("/api/gateway/health")
+        webTestClient.options().uri("http://localhost:8080/api/gateway/health")
                 .header("Origin", "http://localhost:4200")
                 .header("Access-Control-Request-Method", "GET")
                 .exchange()

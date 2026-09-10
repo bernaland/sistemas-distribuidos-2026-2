@@ -10,6 +10,9 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "users")
 public class User {
+    @Column(unique=true) private String cedula;
+    public String getCedula() { return cedula; }
+    public void setCedula(String cedula) { this.cedula=cedula; }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

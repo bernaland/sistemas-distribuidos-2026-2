@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="app.seed.enabled", havingValue="true")
 public class DataInitializer implements CommandLineRunner {
 
     private final ProductRepository repository;

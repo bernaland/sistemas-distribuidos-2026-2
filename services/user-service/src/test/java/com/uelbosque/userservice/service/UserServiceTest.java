@@ -54,6 +54,7 @@ class UserServiceTest {
     @DisplayName("Debe registrar un usuario satisfactoriamente")
     void shouldCreateUserSuccessfully() {
         CreateUserRequest req = new CreateUserRequest("jdoe", "secret123", "John Doe", "jdoe@example.com", "ROLE_USER");
+        req.setCedula("123456");
         when(userRepository.existsByUsername("jdoe")).thenReturn(false);
         when(userRepository.existsByEmail("jdoe@example.com")).thenReturn(false);
         when(passwordEncoder.encode("secret123")).thenReturn("encodedPass");
@@ -70,6 +71,7 @@ class UserServiceTest {
     @DisplayName("Debe lanzar DuplicateResourceException si el username ya existe")
     void shouldThrowWhenUsernameExists() {
         CreateUserRequest req = new CreateUserRequest("jdoe", "secret123", "John Doe", "jdoe@example.com", "ROLE_USER");
+        req.setCedula("123456");
         when(userRepository.existsByUsername("jdoe")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> userService.createUser(req));
@@ -80,6 +82,7 @@ class UserServiceTest {
     @DisplayName("Debe lanzar DuplicateResourceException si el email ya existe")
     void shouldThrowWhenEmailExists() {
         CreateUserRequest req = new CreateUserRequest("jdoe", "secret123", "John Doe", "jdoe@example.com", "ROLE_USER");
+        req.setCedula("123456");
         when(userRepository.existsByUsername("jdoe")).thenReturn(false);
         when(userRepository.existsByEmail("jdoe@example.com")).thenReturn(true);
 

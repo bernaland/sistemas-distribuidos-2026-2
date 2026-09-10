@@ -1,11 +1,7 @@
 # notification-service
 
-Microservicio responsable del envío de notificaciones (email, push).
+Microservicio de Tienda Genérica. Consulta [contratos, configuración, permisos y ejemplos](../../docs/BACKEND.md).
 
-Arranque rápido:
-- Requisitos: JDK 17, Maven
-- Ejecutar: mvn spring-boot:run
+Compilar desde la raíz con: `./services/mvnw.cmd -f services/pom.xml -pl notification-service -am verify`.
 
-Endpoints sugeridos:
-- POST /api/notifications/email
-
+PostgreSQL es la persistencia de ejecución; H2 se reserva para pruebas. Las excepciones son gateway, config-server, admin-service y platform-common, que no necesitan base de datos propia.

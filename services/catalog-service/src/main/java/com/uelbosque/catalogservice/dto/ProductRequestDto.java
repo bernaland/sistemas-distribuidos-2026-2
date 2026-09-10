@@ -7,6 +7,11 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 public class ProductRequestDto {
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Pattern(regexp="[0-9]{1,20}")
+    private String supplierNit;
+    public String getSupplierNit() { return supplierNit; }
+    public void setSupplierNit(String supplierNit) { this.supplierNit = supplierNit; }
 
     @NotBlank(message = "El código de producto es obligatorio")
     @Size(max = 50, message = "El código no debe superar 50 caracteres")
@@ -29,6 +34,7 @@ public class ProductRequestDto {
 
     @NotNull(message = "La tasa de IVA es obligatoria")
     @DecimalMin(value = "0.0", inclusive = true, message = "La tasa de IVA debe ser mayor o igual a 0")
+    @jakarta.validation.constraints.DecimalMax("100.00")
     private BigDecimal ivaRate;
 
     private String category;

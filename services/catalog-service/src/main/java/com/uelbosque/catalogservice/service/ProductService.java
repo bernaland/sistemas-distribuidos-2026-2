@@ -16,18 +16,25 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository repository;
+    private final com.uelbosque.catalogservice.SupplierDirectory suppliers;
+    private final com.uelbosque.catalogservice.CatalogMutex mutex;
 
-    public ProductService(ProductRepository repository) {
+    public ProductService(ProductRepository repository, com.uelbosque.catalogservice.SupplierDirectory suppliers, com.uelbosque.catalogservice.CatalogMutex mutex) {
         this.repository = repository;
+        this.suppliers = suppliers;
+        this.mutex = mutex;
     }
 
     public ProductResponseDto createProduct(ProductRequestDto dto) {
+        suppliers.require(dto.getSupplierNit());
+        mutex.acquire();
         if (repository.existsByCode(dto.getCode())) {
             throw new DuplicateResourceException("El producto con código " + dto.getCode() + " ya existe");
         }
         Product product = new Product(dto.getCode(), dto.getName(), dto.getDescription(),
                 dto.getPurchasePrice(), dto.getSalePrice(), dto.getIvaRate(),
                 dto.getCategory(), dto.getImageUrl());
+        product.setSupplierNit(dto.getSupplierNit());
         return mapToDto(repository.save(product));
     }
 
@@ -52,16 +59,20 @@ public class ProductService {
     }
 
     public ProductResponseDto updateProduct(Long id, ProductRequestDto dto) {
+        suppliers.require(dto.getSupplierNit());
+        mutex.acquire();
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
         if (!product.getCode().equals(dto.getCode()) && repository.existsByCode(dto.getCode())) {
             throw new DuplicateResourceException("El código " + dto.getCode() + " ya pertenece a otro producto");
         }
         applyDtoToProduct(product, dto);
+        product.setSupplierNit(dto.getSupplierNit());
         return mapToDto(repository.save(product));
     }
 
     public void deleteProduct(Long id) {
+        mutex.acquire();
         Product product = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
         product.setActive(false);
@@ -98,11 +109,13 @@ public class ProductService {
     }
 
     private ProductResponseDto mapToDto(Product product) {
-        return new ProductResponseDto(
+        ProductResponseDto result = new ProductResponseDto(
                 product.getId(), product.getCode(), product.getName(),
                 product.getDescription(), product.getPurchasePrice(), product.getSalePrice(),
                 product.getIvaRate(), product.getCategory(), product.getImageUrl(),
                 product.isActive()
         );
+        result.setSupplierNit(product.getSupplierNit());
+        return result;
     }
 }

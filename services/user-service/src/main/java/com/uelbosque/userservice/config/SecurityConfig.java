@@ -32,10 +32,12 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/users", "/api/users/login").permitAll()
-                        .requestMatchers("/h2-console/**", "/error").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+                        .requestMatchers("/actuator/health", "/error").permitAll()
+                        .anyRequest().hasRole("ADMIN")
                 )
+                .exceptionHandling(e -> e.authenticationEntryPoint((request, response, ex) -> response.sendError(401)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

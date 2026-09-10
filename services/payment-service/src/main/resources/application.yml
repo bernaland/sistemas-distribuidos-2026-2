@@ -1,18 +1,29 @@
 server:
   port: 8086
 spring:
+  cloud:
+    config:
+      enabled: ${CONFIG_ENABLED:false}
   application:
     name: payment-service
   datasource:
-    url: jdbc:h2:mem:paymentdb;DB_CLOSE_DELAY=-1
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/payments}
+    username: ${DB_USER:payments}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
-
-logging:
-  level:
-    root: INFO
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 900000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

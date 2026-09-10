@@ -24,6 +24,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
+    @org.mockito.Mock com.uelbosque.catalogservice.CatalogMutex mutex;
+    @org.mockito.Mock com.uelbosque.catalogservice.SupplierDirectory suppliers;
 
     @Mock
     private ProductRepository repository;
