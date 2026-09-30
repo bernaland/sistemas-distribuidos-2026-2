@@ -1,2 +1,179 @@
-/* global styles for the skeleton app */
-html,body{height:100%;margin:0}
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+:root {
+  --tg-primary: #4f46e5;
+  --tg-primary-hover: #4338ca;
+  --tg-primary-light: #e0e7ff;
+  --tg-primary-glow: rgba(79, 70, 229, 0.25);
+  --tg-accent: #06b6d4;
+  --tg-accent-light: #cffafe;
+  --tg-accent-glow: rgba(6, 182, 212, 0.25);
+  --tg-success: #10b981;
+  --tg-danger: #ef4444;
+  --tg-warning: #f59e0b;
+  --tg-surface: rgba(255, 255, 255, 0.86);
+  --tg-surface-solid: #ffffff;
+  --tg-surface-border: rgba(226, 232, 240, 0.85);
+  --tg-text-main: #0f172a;
+  --tg-text-muted: #64748b;
+  --tg-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --tg-shadow-md: 0 4px 18px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  --tg-shadow-lg: 0 14px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  --tg-transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --tg-radius-sm: 8px;
+  --tg-radius-md: 14px;
+  --tg-radius-lg: 20px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  color: var(--tg-text-main);
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.07) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+    radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphic Surfaces */
+.tg-glass {
+  background: var(--tg-surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--tg-surface-border);
+}
+
+.tg-card {
+  background: var(--tg-surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--tg-surface-border);
+  border-radius: var(--tg-radius-md);
+  box-shadow: var(--tg-shadow-md);
+  transition: var(--tg-transition);
+}
+
+.tg-card-interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--tg-shadow-lg);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Animations */
+@keyframes tgFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tgPulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.animate-fade-in {
+  animation: tgFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.status-dot-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--tg-success);
+  animation: tgPulseDot 2s infinite;
+}
+
+/* Button & Form Overrides */
+.btn-primary-tg {
+  background: linear-gradient(135deg, var(--tg-primary), #6366f1);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--tg-radius-sm);
+  box-shadow: 0 4px 12px var(--tg-primary-glow);
+  transition: var(--tg-transition);
+}
+
+.btn-primary-tg:hover {
+  background: linear-gradient(135deg, var(--tg-primary-hover), var(--tg-primary));
+  color: #fff;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px var(--tg-primary-glow);
+}
+
+.btn-secondary-tg {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--tg-radius-sm);
+  transition: var(--tg-transition);
+}
+
+.btn-secondary-tg:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+  transform: translateY(-1px);
+}
+
+.btn-danger-tg {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--tg-radius-sm);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  transition: var(--tg-transition);
+}
+
+.btn-danger-tg:hover {
+  background: #b91c1c;
+  color: #fff;
+  transform: translateY(-1.5px);
+}
+
+/* Form Control Polish */
+.form-control-tg {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #cbd5e1;
+  border-radius: var(--tg-radius-sm);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.925rem;
+  color: var(--tg-text-main);
+  transition: var(--tg-transition);
+}
+
+.form-control-tg:focus {
+  background-color: #ffffff;
+  border-color: var(--tg-primary);
+  box-shadow: 0 0 0 3.5px var(--tg-primary-glow);
+  outline: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

@@ -1,0 +1,8 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+spring:
+  jpa:
+    open-in-view: false
