@@ -55,7 +55,7 @@ Todas las llamadas siguientes, excepto login, requieren `Authorization: Bearer T
 1. Iniciar sesión: `POST /api/users/login`.
 
 ```json
-{"username":"admininicial","password":"admin123456"}
+{"username":"admininicial","password":"<ADMIN_INITIAL_PASSWORD>"}
 ```
 
 El administrador inicial se crea solo cuando la base de usuarios está vacía y tiene cédula técnica `0`. Crear un administrador personal mediante `POST /api/users`:

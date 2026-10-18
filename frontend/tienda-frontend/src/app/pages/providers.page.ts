@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ProvidersOrganism } from '../organisms';
 
 @Component({
   selector: 'page-providers',
-  template: `<organism-providers></organism-providers>`
+  standalone: true,
+  imports: [ProvidersOrganism],
+  template: `<organism-providers></organism-providers>`,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProvidersPage {}

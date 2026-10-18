@@ -49,6 +49,7 @@ public class DataInitializer implements CommandLineRunner {
         dto.setIvaRate(iva);
         dto.setCategory(cat);
         dto.setImageUrl("https://via.placeholder.com/150");
+        dto.setSupplierNit("900112233");
         service.createProduct(dto);
     }
 }

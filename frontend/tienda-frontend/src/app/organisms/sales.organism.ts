@@ -1,15 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CurrencyPipe } from '@angular/common';
+import { CustomerService, ProductService, SaleService } from '../services';
+import { SaleItemRequest, SaleRequest } from '../models';
+import { ButtonAtom, InputAtom, LabelAtom } from '../atoms';
 
-interface SaleItem {
+interface SaleItemRow {
   codigo: string;
   nombre: string;
   cantidad: number;
   precioUnitario: number;
+  ivaRate: number;
   valorTotal: number;
 }
 
 @Component({
   selector: 'organism-sales',
+  standalone: true,
+  imports: [FormsModule, CurrencyPipe, ButtonAtom, InputAtom, LabelAtom],
   template: `
     <div class="d-flex flex-column gap-4">
       <div class="tg-card p-4">
@@ -25,15 +33,17 @@ interface SaleItem {
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="badge bg-light text-dark border px-3 py-2">
-              <i class="bi bi-receipt me-1"></i> Consecutivo: #00{{ consecutivoVenta }}
+              <i class="bi bi-receipt me-1"></i> Consecutivo: {{ consecutivoVenta ? '#' + consecutivoVenta : 'Nuevo' }}
             </span>
           </div>
         </div>
 
-        <div *ngIf="notification" [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notification.type">
-          <i class="bi bi-check-circle-fill"></i>
-          <span>{{ notification.text }}</span>
-        </div>
+        @if (notification(); as notif) {
+          <div [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notif.type">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>{{ notif.text }}</span>
+          </div>
+        }
 
         <!-- Client Lookup Row -->
         <div class="row g-3 align-items-end mb-4 p-3 bg-light rounded-3">
@@ -53,9 +63,17 @@ interface SaleItem {
         </div>
 
         <!-- Product Line Items -->
-        <h3 class="h6 fw-bold mb-3 text-secondary">
-          <i class="bi bi-bag-plus me-2 text-primary"></i>Artículos de la Venta
-        </h3>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h3 class="h6 fw-bold mb-0 text-secondary">
+            <i class="bi bi-bag-plus me-2 text-primary"></i>Artículos de la Venta (1 a 3 renglones)
+          </h3>
+          @if (items.length < 3) {
+            <atom-button variant="outline" (onClick)="agregarFila()">
+              <i class="bi bi-plus-lg me-1"></i> Agregar Renglón
+            </atom-button>
+          }
+        </div>
+
         <div class="table-responsive mb-3">
           <table class="table table-bordered align-middle">
             <thead class="table-light small text-uppercase text-muted">
@@ -63,24 +81,42 @@ interface SaleItem {
                 <th style="width: 180px;">Cód. Producto</th>
                 <th>Nombre del Producto</th>
                 <th style="width: 120px;">Cant.</th>
+                <th style="width: 140px;">P. Unitario</th>
+                <th style="width: 100px;">IVA</th>
                 <th style="width: 160px;">V. Total</th>
+                <th style="width: 50px;" class="text-center">#</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of items; let i = index">
-                <td>
-                  <input class="form-control-tg form-control-sm" [(ngModel)]="item.codigo" (blur)="lookupItem(i)" placeholder="Ej. PRD-101" />
-                </td>
-                <td>
-                  <input class="form-control-tg form-control-sm bg-light" [(ngModel)]="item.nombre" readonly placeholder="Descripción" />
-                </td>
-                <td>
-                  <input type="number" min="1" class="form-control-tg form-control-sm text-center" [(ngModel)]="item.cantidad" (input)="calcTotals()" />
-                </td>
-                <td class="fw-bold text-end">
-                  {{ item.valorTotal | currency:'USD':'symbol':'1.0-0' }}
-                </td>
-              </tr>
+              @for (item of items; track $index; let i = $index) {
+                <tr>
+                  <td>
+                    <input class="form-control-tg form-control-sm" [(ngModel)]="item.codigo" (blur)="lookupItem(i)" placeholder="Ej. 1" />
+                  </td>
+                  <td>
+                    <input class="form-control-tg form-control-sm bg-light" [(ngModel)]="item.nombre" readonly placeholder="Descripción del producto" />
+                  </td>
+                  <td>
+                    <input type="number" min="1" max="1000" class="form-control-tg form-control-sm text-center" [(ngModel)]="item.cantidad" (input)="calcTotals()" />
+                  </td>
+                  <td class="text-end small">
+                    {{ item.precioUnitario | currency:'USD':'symbol':'1.0-0' }}
+                  </td>
+                  <td class="text-center small">
+                    <span class="badge bg-light text-dark border">{{ item.ivaRate }}%</span>
+                  </td>
+                  <td class="fw-bold text-end">
+                    {{ item.valorTotal | currency:'USD':'symbol':'1.0-0' }}
+                  </td>
+                  <td class="text-center">
+                    @if (items.length > 1) {
+                      <button (click)="quitarFila(i)" class="btn btn-sm btn-link text-danger p-0" title="Eliminar renglón">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
@@ -90,11 +126,11 @@ interface SaleItem {
           <div class="col-md-4 col-12">
             <div class="p-3 bg-light rounded-3 d-flex flex-column gap-2">
               <div class="d-flex justify-content-between text-muted small">
-                <span>Total Venta:</span>
+                <span>Subtotal Venta:</span>
                 <span class="fw-semibold">{{ subtotal | currency:'USD':'symbol':'1.0-0' }}</span>
               </div>
               <div class="d-flex justify-content-between text-muted small">
-                <span>Total IVA (19%):</span>
+                <span>Total IVA:</span>
                 <span class="fw-semibold">{{ ivaTotal | currency:'USD':'symbol':'1.0-0' }}</span>
               </div>
               <div class="d-flex justify-content-between h5 fw-bold text-primary border-top pt-2 mb-0">
@@ -115,71 +151,140 @@ interface SaleItem {
         </div>
       </div>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SalesOrganism {
-  consecutivoVenta = 104;
+export class SalesOrganism implements OnInit {
+  private readonly customerService = inject(CustomerService);
+  private readonly productService = inject(ProductService);
+  private readonly saleService = inject(SaleService);
+
+  consecutivoVenta: number | null = null;
   cedulaCliente = '';
   nombreCliente = '';
-  notification: { text: string; type: string } | null = null;
+  readonly notification = signal<{ text: string; type: string } | null>(null);
 
-  items: SaleItem[] = [
-    { codigo: 'PRD-101', nombre: 'Leche Entera 1000ml', cantidad: 2, precioUnitario: 4200, valorTotal: 8400 },
-    { codigo: 'PRD-102', nombre: 'Café Especial Quindío 500g', cantidad: 1, precioUnitario: 19500, valorTotal: 19500 },
-    { codigo: '', nombre: '', cantidad: 1, precioUnitario: 0, valorTotal: 0 }
+  items: SaleItemRow[] = [
+    { codigo: '', nombre: '', cantidad: 1, precioUnitario: 0, ivaRate: 0, valorTotal: 0 }
   ];
 
-  subtotal = 27900;
-  ivaTotal = 5301;
-  totalFinal = 33201;
+  subtotal = 0;
+  ivaTotal = 0;
+  totalFinal = 0;
+
+  ngOnInit(): void {
+    this.limpiarVenta();
+  }
 
   consultarCliente(): void {
-    if (this.cedulaCliente === '1020304050') {
-      this.nombreCliente = 'Distribuidora del Norte';
-      this.setNotification('Cliente verificado con éxito', 'alert-success');
-    } else {
-      this.nombreCliente = 'Cliente Mostrador';
-      this.setNotification('Cliente general asignado', 'alert-info');
+    if (!this.cedulaCliente.trim()) {
+      this.setNotification('Por favor ingrese la cédula del cliente', 'alert-warning');
+      return;
     }
+    this.customerService.getByCedula(this.cedulaCliente.trim()).subscribe({
+      next: (c) => {
+        this.nombreCliente = c.name;
+        this.setNotification(`Cliente confirmado: ${c.name}`, 'alert-success');
+      },
+      error: () => {
+        this.nombreCliente = '';
+        this.setNotification('Cliente no encontrado en la base de datos', 'alert-warning');
+      }
+    });
   }
 
   lookupItem(index: number): void {
     const item = this.items[index];
-    if (item.codigo === 'PRD-103') {
-      item.nombre = 'Arroz Premium 1000g';
-      item.precioUnitario = 5300;
+    if (!item.codigo.trim()) return;
+    this.productService.getByCode(item.codigo.trim()).subscribe({
+      next: (p) => {
+        item.nombre = p.name;
+        item.precioUnitario = p.salePrice;
+        item.ivaRate = p.ivaRate;
+        this.calcTotals();
+      },
+      error: () => {
+        item.nombre = 'Producto no encontrado';
+        item.precioUnitario = 0;
+        item.ivaRate = 0;
+        this.calcTotals();
+      }
+    });
+  }
+
+  agregarFila(): void {
+    if (this.items.length < 3) {
+      this.items.push({ codigo: '', nombre: '', cantidad: 1, precioUnitario: 0, ivaRate: 0, valorTotal: 0 });
     }
-    this.calcTotals();
+  }
+
+  quitarFila(index: number): void {
+    if (this.items.length > 1) {
+      this.items.splice(index, 1);
+      this.calcTotals();
+    }
   }
 
   calcTotals(): void {
-    let sum = 0;
+    let sumSubtotal = 0;
+    let sumIva = 0;
     for (const it of this.items) {
-      it.valorTotal = (it.cantidad || 0) * (it.precioUnitario || 0);
-      sum += it.valorTotal;
+      const lineSubtotal = (Number(it.cantidad) || 0) * (Number(it.precioUnitario) || 0);
+      const lineIva = lineSubtotal * ((Number(it.ivaRate) || 0) / 100);
+      it.valorTotal = lineSubtotal + lineIva;
+      sumSubtotal += lineSubtotal;
+      sumIva += lineIva;
     }
-    this.subtotal = sum;
-    this.ivaTotal = Math.round(sum * 0.19);
-    this.totalFinal = this.subtotal + this.ivaTotal;
+    this.subtotal = Math.round(sumSubtotal * 100) / 100;
+    this.ivaTotal = Math.round(sumIva * 100) / 100;
+    this.totalFinal = Math.round((this.subtotal + this.ivaTotal) * 100) / 100;
   }
 
   confirmarVenta(): void {
-    if (this.totalFinal <= 0) {
-      this.setNotification('Debe agregar al menos un producto para facturar', 'alert-warning');
+    if (!this.cedulaCliente || !this.nombreCliente) {
+      this.setNotification('Debe validar primero un cliente antes de registrar la venta', 'alert-warning');
       return;
     }
-    this.setNotification(`Factura #${this.consecutivoVenta} generada con éxito por ${this.totalFinal}`, 'alert-success');
-    this.consecutivoVenta++;
+    const validLines = this.items.filter(it => it.codigo.trim() && it.cantidad > 0);
+    if (validLines.length === 0) {
+      this.setNotification('Debe registrar al menos un producto válido', 'alert-warning');
+      return;
+    }
+    this.ejecutarVenta(validLines);
   }
 
-  limpiarVenta(): void {
+  private ejecutarVenta(validLines: SaleItemRow[]): void {
+    const payload: SaleRequest = {
+      customerCedula: this.cedulaCliente,
+      items: validLines.map(it => ({ productCode: it.codigo.trim(), quantity: Number(it.cantidad) }))
+    };
+    this.saleService.create(payload).subscribe({
+      next: (res) => {
+        this.consecutivoVenta = res.id;
+        this.setNotification(`Venta #${res.id} registrada exitosamente por $${res.grandTotal}`, 'alert-success');
+        this.limpiarFormulario();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || 'Error al procesar la venta en el backend';
+        this.setNotification(msg, 'alert-danger');
+      }
+    });
+  }
+
+  private limpiarFormulario(): void {
     this.cedulaCliente = '';
     this.nombreCliente = '';
-    this.items = [{ codigo: '', nombre: '', cantidad: 1, precioUnitario: 0, valorTotal: 0 }];
+    this.items = [{ codigo: '', nombre: '', cantidad: 1, precioUnitario: 0, ivaRate: 0, valorTotal: 0 }];
     this.calcTotals();
   }
 
+  limpiarVenta(): void {
+    this.consecutivoVenta = null;
+    this.limpiarFormulario();
+    this.notification.set(null);
+  }
+
   private setNotification(text: string, type: string): void {
-    this.notification = { text, type };
+    this.notification.set({ text, type });
   }
 }

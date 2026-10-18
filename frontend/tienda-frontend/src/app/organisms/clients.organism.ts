@@ -1,15 +1,12 @@
-import { Component } from '@angular/core';
-
-interface ClientRecord {
-  cedula: string;
-  nombre: string;
-  direccion: string;
-  telefono: string;
-  correo: string;
-}
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { CustomerService } from '../services';
+import { Customer } from '../models';
+import { ButtonAtom, InputAtom, LabelAtom } from '../atoms';
 
 @Component({
   selector: 'organism-clients',
+  standalone: true,
+  imports: [ButtonAtom, InputAtom, LabelAtom],
   template: `
     <div class="d-flex flex-column gap-4">
       <div class="tg-card p-4">
@@ -24,14 +21,16 @@ interface ClientRecord {
             </div>
           </div>
           <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-2">
-            <i class="bi bi-people me-1"></i> {{ clientsList.length }} Clientes Registrados
+            <i class="bi bi-people me-1"></i> {{ clientsList().length }} Clientes Registrados
           </span>
         </div>
 
-        <div *ngIf="notification" [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notification.type">
-          <i class="bi bi-info-circle-fill"></i>
-          <span>{{ notification.text }}</span>
-        </div>
+        @if (notification(); as notif) {
+          <div [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notif.type">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>{{ notif.text }}</span>
+          </div>
+        }
 
         <div class="row g-3">
           <div class="col-md-6 col-12">
@@ -89,53 +88,69 @@ interface ClientRecord {
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let c of clientsList" (click)="selectClient(c)" role="button">
-                <td class="fw-semibold text-dark">{{ c.cedula }}</td>
-                <td>{{ c.nombre }}</td>
-                <td><i class="bi bi-telephone text-muted me-1"></i>{{ c.telefono }}</td>
-                <td><span class="text-muted small">{{ c.direccion }}</span></td>
-                <td><span class="badge bg-light text-secondary border">{{ c.correo }}</span></td>
-                <td class="text-end">
-                  <button class="btn btn-sm btn-outline-info rounded-circle"><i class="bi bi-pencil"></i></button>
-                </td>
-              </tr>
+              @for (c of clientsList(); track c.cedula) {
+                <tr (click)="selectClient(c)" role="button">
+                  <td class="fw-semibold text-dark">{{ c.cedula }}</td>
+                  <td>{{ c.name }}</td>
+                  <td><i class="bi bi-telephone text-muted me-1"></i>{{ c.phone }}</td>
+                  <td><span class="text-muted small">{{ c.address }}</span></td>
+                  <td><span class="badge bg-light text-secondary border">{{ c.email }}</span></td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-info rounded-circle"><i class="bi bi-pencil"></i></button>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientsOrganism {
+export class ClientsOrganism implements OnInit {
+  private readonly customerService = inject(CustomerService);
+
   cedula = '';
   nombre = '';
   direccion = '';
   telefono = '';
   correo = '';
-  notification: { text: string; type: string } | null = null;
+  readonly notification = signal<{ text: string; type: string } | null>(null);
+  readonly clientsList = signal<Customer[]>([]);
 
-  clientsList: ClientRecord[] = [
-    { cedula: '1020304050', nombre: 'Distribuidora del Norte', direccion: 'Cra 45 # 128-04', telefono: '3128901234', correo: 'contacto@distnorte.com' },
-    { cedula: '1098765432', nombre: 'Supermercados La Estrella', direccion: 'Av. El Dorado # 68-90', telefono: '3004567890', correo: 'compras@laestrella.com' }
-  ];
+  ngOnInit(): void {
+    this.cargarClientes();
+  }
 
-  selectClient(c: ClientRecord): void {
+  cargarClientes(): void {
+    this.customerService.list().subscribe({
+      next: (data) => this.clientsList.set(data),
+      error: () => this.setNotification('Error al cargar clientes del servidor', 'alert-danger')
+    });
+  }
+
+  selectClient(c: Customer): void {
     this.cedula = c.cedula;
-    this.nombre = c.nombre;
-    this.direccion = c.direccion;
-    this.telefono = c.telefono;
-    this.correo = c.correo;
-    this.setNotification(`Cliente ${c.nombre} seleccionado`, 'alert-info');
+    this.nombre = c.name;
+    this.direccion = c.address;
+    this.telefono = c.phone;
+    this.correo = c.email;
+    this.setNotification(`Cliente ${c.name} seleccionado`, 'alert-info');
   }
 
   consultar(): void {
-    const found = this.clientsList.find(c => c.cedula === this.cedula);
-    if (found) {
-      this.selectClient(found);
-      this.setNotification(`Cliente encontrado: ${found.nombre}`, 'alert-success');
-    } else {
-      this.setNotification('Cliente no encontrado con esa cédula', 'alert-warning');
+    if (!this.cedula.trim()) {
+      this.setNotification('Ingrese una cédula para consultar', 'alert-warning');
+      return;
     }
+    this.customerService.getByCedula(this.cedula.trim()).subscribe({
+      next: (c) => {
+        this.selectClient(c);
+        this.setNotification(`Cliente encontrado: ${c.name}`, 'alert-success');
+      },
+      error: () => this.setNotification('Cliente no encontrado con esa cédula', 'alert-warning')
+    });
   }
 
   crear(): void {
@@ -143,30 +158,59 @@ export class ClientsOrganism {
       this.setNotification('Por favor complete cédula y nombre', 'alert-warning');
       return;
     }
-    this.clientsList.push({ cedula: this.cedula, nombre: this.nombre, direccion: this.direccion, telefono: this.telefono, correo: this.correo });
-    this.setNotification(`Cliente ${this.nombre} registrado`, 'alert-success');
-    this.resetForm();
+    const payload = this.buildPayload();
+    this.customerService.create(payload).subscribe({
+      next: (created) => {
+        this.setNotification(`Cliente ${created.name} registrado`, 'alert-success');
+        this.resetForm();
+        this.cargarClientes();
+      },
+      error: (err) => this.handleError(err, 'Error al registrar cliente')
+    });
   }
 
   actualizar(): void {
-    const index = this.clientsList.findIndex(c => c.cedula === this.cedula);
-    if (index >= 0) {
-      this.clientsList[index] = { cedula: this.cedula, nombre: this.nombre, direccion: this.direccion, telefono: this.telefono, correo: this.correo };
-      this.setNotification(`Cliente ${this.nombre} actualizado`, 'alert-success');
-    } else {
-      this.setNotification('Seleccione un cliente para actualizar', 'alert-warning');
+    if (!this.cedula) {
+      this.setNotification('Seleccione o ingrese un cliente para actualizar', 'alert-warning');
+      return;
     }
+    const payload = this.buildPayload();
+    this.customerService.update(this.cedula, payload).subscribe({
+      next: (updated) => {
+        this.setNotification(`Cliente ${updated.name} actualizado`, 'alert-success');
+        this.cargarClientes();
+      },
+      error: (err) => this.handleError(err, 'Error al actualizar cliente')
+    });
   }
 
   borrar(): void {
-    const prev = this.clientsList.length;
-    this.clientsList = this.clientsList.filter(c => c.cedula !== this.cedula);
-    if (this.clientsList.length < prev) {
-      this.setNotification('Cliente eliminado', 'alert-danger');
-      this.resetForm();
-    } else {
-      this.setNotification('Cliente no encontrado para borrar', 'alert-warning');
+    if (!this.cedula) {
+      this.setNotification('Seleccione un cliente para borrar', 'alert-warning');
+      return;
     }
+    this.customerService.delete(this.cedula).subscribe({
+      next: () => {
+        this.setNotification('Cliente eliminado exitosamente', 'alert-danger');
+        this.resetForm();
+        this.cargarClientes();
+      },
+      error: (err) => this.handleError(err, 'Error al eliminar cliente')
+    });
+  }
+
+  private buildPayload(): Customer {
+    return {
+      cedula: this.cedula,
+      name: this.nombre,
+      address: this.direccion,
+      phone: this.telefono,
+      email: this.correo
+    };
+  }
+
+  private handleError(err: { error?: { message?: string } }, fallback: string): void {
+    this.setNotification(err?.error?.message || fallback, 'alert-danger');
   }
 
   private resetForm(): void {
@@ -178,6 +222,6 @@ export class ClientsOrganism {
   }
 
   private setNotification(text: string, type: string): void {
-    this.notification = { text, type };
+    this.notification.set({ text, type });
   }
 }
