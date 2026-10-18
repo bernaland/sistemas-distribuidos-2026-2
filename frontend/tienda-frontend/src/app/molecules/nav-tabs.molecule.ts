@@ -1,24 +1,42 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../services';
 
 interface NavItem {
   readonly path: string;
   readonly label: string;
   readonly icon: string;
+  readonly adminOnly?: boolean;
 }
+
+const ALL_NAV_ITEMS: readonly NavItem[] = [
+  { path: '/dashboard', label: 'Dashboard', icon: 'bi-grid-1x2' },
+  { path: '/users', label: 'Usuarios', icon: 'bi-people', adminOnly: true },
+  { path: '/clients', label: 'Clientes', icon: 'bi-person-badge', adminOnly: true },
+  { path: '/providers', label: 'Proveedores', icon: 'bi-truck', adminOnly: true },
+  { path: '/products', label: 'Productos', icon: 'bi-box-seam', adminOnly: true },
+  { path: '/sales', label: 'Ventas', icon: 'bi-cart-check' },
+  { path: '/reports', label: 'Reportes', icon: 'bi-bar-chart-line', adminOnly: true }
+];
 
 @Component({
   selector: 'molecule-nav-tabs',
+  standalone: true,
+  imports: [RouterLink, RouterLinkActive],
   template: `
-    <nav class="nav-container p-2 px-3 d-flex align-items-center gap-2 overflow-x-auto">
-      <a
-        *ngFor="let item of navItems"
-        [routerLink]="item.path"
-        routerLinkActive="active"
-        class="nav-tab-pill d-inline-flex align-items-center gap-2 text-decoration-none">
-        <i [class]="'bi ' + item.icon"></i>
-        <span>{{ item.label }}</span>
-      </a>
-    </nav>
+    @if (authService.isAuthenticated()) {
+      <nav class="nav-container p-2 px-3 d-flex align-items-center gap-2 overflow-x-auto">
+        @for (item of filteredNavItems(); track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            class="nav-tab-pill d-inline-flex align-items-center gap-2 text-decoration-none">
+            <i [class]="'bi ' + item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    }
   `,
   styles: [`
     .nav-container {
@@ -49,16 +67,14 @@ interface NavItem {
       font-weight: 600;
       border-color: rgba(99, 102, 241, 0.4);
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavTabsMolecule {
-  readonly navItems: readonly NavItem[] = [
-    { path: '/dashboard', label: 'Dashboard', icon: 'bi-grid-1x2' },
-    { path: '/users', label: 'Usuarios', icon: 'bi-people' },
-    { path: '/clients', label: 'Clientes', icon: 'bi-person-badge' },
-    { path: '/providers', label: 'Proveedores', icon: 'bi-truck' },
-    { path: '/products', label: 'Productos', icon: 'bi-box-seam' },
-    { path: '/sales', label: 'Ventas', icon: 'bi-cart-check' },
-    { path: '/reports', label: 'Reportes', icon: 'bi-bar-chart-line' }
-  ];
+  readonly authService = inject(AuthService);
+
+  readonly filteredNavItems = computed(() => {
+    const isAdmin = this.authService.hasRole('ROLE_ADMIN');
+    return ALL_NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
+  });
 }

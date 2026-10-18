@@ -20,6 +20,9 @@ public class CatalogMutex {
     }
     @Transactional(propagation=Propagation.MANDATORY)
     public void acquire() {
+        if (!repository.existsById(1L)) {
+            initialize();
+        }
         repository.acquire().orElseThrow(() -> new IllegalStateException("Catalogo aun no inicializado"));
     }
 }

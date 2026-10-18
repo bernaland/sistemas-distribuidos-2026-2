@@ -19,6 +19,8 @@ spring:
       max-file-size: 5MB
       max-request-size: 5MB
 app:
+  admin:
+    initial-password: ${ADMIN_INITIAL_PASSWORD}
   jwt:
     secret: ${JWT_SECRET}
     expiration-ms: 900000

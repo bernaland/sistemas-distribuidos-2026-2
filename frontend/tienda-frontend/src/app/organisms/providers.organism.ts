@@ -1,15 +1,12 @@
-import { Component } from '@angular/core';
-
-interface ProviderRecord {
-  nit: string;
-  nombre: string;
-  direccion: string;
-  telefono: string;
-  ciudad: string;
-}
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { SupplierService } from '../services';
+import { Supplier } from '../models';
+import { ButtonAtom, InputAtom, LabelAtom } from '../atoms';
 
 @Component({
   selector: 'organism-providers',
+  standalone: true,
+  imports: [ButtonAtom, InputAtom, LabelAtom],
   template: `
     <div class="d-flex flex-column gap-4">
       <div class="tg-card p-4">
@@ -24,19 +21,21 @@ interface ProviderRecord {
             </div>
           </div>
           <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
-            <i class="bi bi-building me-1"></i> {{ providersList.length }} Proveedores Activos
+            <i class="bi bi-building me-1"></i> {{ providersList().length }} Proveedores Activos
           </span>
         </div>
 
-        <div *ngIf="notification" [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notification.type">
-          <i class="bi bi-info-circle-fill"></i>
-          <span>{{ notification.text }}</span>
-        </div>
+        @if (notification(); as notif) {
+          <div [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notif.type">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>{{ notif.text }}</span>
+          </div>
+        }
 
         <div class="row g-3">
           <div class="col-md-6 col-12">
             <atom-label text="NIT" [required]="true"></atom-label>
-            <atom-input icon="bi-briefcase" placeholder="Ej. 900123456-1" [model]="nit" (modelChange)="nit = $event.toString()"></atom-input>
+            <atom-input icon="bi-briefcase" placeholder="Ej. 900112233" [model]="nit" (modelChange)="nit = $event.toString()"></atom-input>
           </div>
           <div class="col-md-6 col-12">
             <atom-label text="Nombre de la Empresa" [required]="true"></atom-label>
@@ -89,53 +88,69 @@ interface ProviderRecord {
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let p of providersList" (click)="selectProvider(p)" role="button">
-                <td class="fw-semibold text-dark">{{ p.nit }}</td>
-                <td>{{ p.nombre }}</td>
-                <td>{{ p.telefono }}</td>
-                <td class="text-muted small">{{ p.direccion }}</td>
-                <td><span class="badge bg-light text-dark border">{{ p.ciudad }}</span></td>
-                <td class="text-end">
-                  <button class="btn btn-sm btn-outline-success rounded-circle"><i class="bi bi-pencil"></i></button>
-                </td>
-              </tr>
+              @for (p of providersList(); track p.nit) {
+                <tr (click)="selectProvider(p)" role="button">
+                  <td class="fw-semibold text-dark">{{ p.nit }}</td>
+                  <td>{{ p.name }}</td>
+                  <td>{{ p.phone }}</td>
+                  <td class="text-muted small">{{ p.address }}</td>
+                  <td><span class="badge bg-light text-dark border">{{ p.city }}</span></td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-success rounded-circle"><i class="bi bi-pencil"></i></button>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProvidersOrganism {
+export class ProvidersOrganism implements OnInit {
+  private readonly supplierService = inject(SupplierService);
+
   nit = '';
   nombre = '';
   direccion = '';
   telefono = '';
   ciudad = '';
-  notification: { text: string; type: string } | null = null;
+  readonly notification = signal<{ text: string; type: string } | null>(null);
+  readonly providersList = signal<Supplier[]>([]);
 
-  providersList: ProviderRecord[] = [
-    { nit: '900112233-1', nombre: 'Alimentos del Campo S.A.', direccion: 'Zona Franca Km 3', telefono: '6013456789', ciudad: 'Bogotá' },
-    { nit: '900445566-2', nombre: 'Empaques e Insumos de Colombia', direccion: 'Calle 80 # 70-15', telefono: '6018901234', ciudad: 'Medellín' }
-  ];
+  ngOnInit(): void {
+    this.cargarProveedores();
+  }
 
-  selectProvider(p: ProviderRecord): void {
+  cargarProveedores(): void {
+    this.supplierService.list().subscribe({
+      next: (data) => this.providersList.set(data),
+      error: () => this.setNotification('Error al cargar proveedores del servidor', 'alert-danger')
+    });
+  }
+
+  selectProvider(p: Supplier): void {
     this.nit = p.nit;
-    this.nombre = p.nombre;
-    this.direccion = p.direccion;
-    this.telefono = p.telefono;
-    this.ciudad = p.ciudad;
-    this.setNotification(`Proveedor ${p.nombre} seleccionado`, 'alert-info');
+    this.nombre = p.name;
+    this.direccion = p.address;
+    this.telefono = p.phone;
+    this.ciudad = p.city;
+    this.setNotification(`Proveedor ${p.name} seleccionado`, 'alert-info');
   }
 
   consultar(): void {
-    const found = this.providersList.find(p => p.nit === this.nit);
-    if (found) {
-      this.selectProvider(found);
-      this.setNotification(`Proveedor encontrado: ${found.nombre}`, 'alert-success');
-    } else {
-      this.setNotification('Proveedor no encontrado con ese NIT', 'alert-warning');
+    if (!this.nit.trim()) {
+      this.setNotification('Ingrese un NIT para consultar', 'alert-warning');
+      return;
     }
+    this.supplierService.getByNit(this.nit.trim()).subscribe({
+      next: (p) => {
+        this.selectProvider(p);
+        this.setNotification(`Proveedor encontrado: ${p.name}`, 'alert-success');
+      },
+      error: () => this.setNotification('Proveedor no encontrado con ese NIT', 'alert-warning')
+    });
   }
 
   crear(): void {
@@ -143,30 +158,59 @@ export class ProvidersOrganism {
       this.setNotification('Por favor complete NIT y nombre', 'alert-warning');
       return;
     }
-    this.providersList.push({ nit: this.nit, nombre: this.nombre, direccion: this.direccion, telefono: this.telefono, ciudad: this.ciudad });
-    this.setNotification(`Proveedor ${this.nombre} creado`, 'alert-success');
-    this.resetForm();
+    const payload = this.buildPayload();
+    this.supplierService.create(payload).subscribe({
+      next: (created) => {
+        this.setNotification(`Proveedor ${created.name} registrado`, 'alert-success');
+        this.resetForm();
+        this.cargarProveedores();
+      },
+      error: (err) => this.handleError(err, 'Error al registrar proveedor')
+    });
   }
 
   actualizar(): void {
-    const index = this.providersList.findIndex(p => p.nit === this.nit);
-    if (index >= 0) {
-      this.providersList[index] = { nit: this.nit, nombre: this.nombre, direccion: this.direccion, telefono: this.telefono, ciudad: this.ciudad };
-      this.setNotification(`Proveedor ${this.nombre} actualizado`, 'alert-success');
-    } else {
-      this.setNotification('Seleccione un proveedor para actualizar', 'alert-warning');
+    if (!this.nit) {
+      this.setNotification('Seleccione o ingrese un proveedor para actualizar', 'alert-warning');
+      return;
     }
+    const payload = this.buildPayload();
+    this.supplierService.update(this.nit, payload).subscribe({
+      next: (updated) => {
+        this.setNotification(`Proveedor ${updated.name} actualizado`, 'alert-success');
+        this.cargarProveedores();
+      },
+      error: (err) => this.handleError(err, 'Error al actualizar proveedor')
+    });
   }
 
   borrar(): void {
-    const prev = this.providersList.length;
-    this.providersList = this.providersList.filter(p => p.nit !== this.nit);
-    if (this.providersList.length < prev) {
-      this.setNotification('Proveedor eliminado', 'alert-danger');
-      this.resetForm();
-    } else {
-      this.setNotification('Proveedor no encontrado para borrar', 'alert-warning');
+    if (!this.nit) {
+      this.setNotification('Seleccione un proveedor para borrar', 'alert-warning');
+      return;
     }
+    this.supplierService.delete(this.nit).subscribe({
+      next: () => {
+        this.setNotification('Proveedor eliminado exitosamente', 'alert-danger');
+        this.resetForm();
+        this.cargarProveedores();
+      },
+      error: (err) => this.handleError(err, 'Error al eliminar proveedor')
+    });
+  }
+
+  private buildPayload(): Supplier {
+    return {
+      nit: this.nit,
+      name: this.nombre,
+      address: this.direccion,
+      phone: this.telefono,
+      city: this.ciudad
+    };
+  }
+
+  private handleError(err: { error?: { message?: string } }, fallback: string): void {
+    this.setNotification(err?.error?.message || fallback, 'alert-danger');
   }
 
   private resetForm(): void {
@@ -178,6 +222,6 @@ export class ProvidersOrganism {
   }
 
   private setNotification(text: string, type: string): void {
-    this.notification = { text, type };
+    this.notification.set({ text, type });
   }
 }

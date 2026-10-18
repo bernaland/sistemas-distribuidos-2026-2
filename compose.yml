@@ -37,6 +37,7 @@ services:
       SPRING_CLOUD_CONFIG_USERNAME: config
       SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASSWORD}
       JWT_SECRET: ${JWT_SECRET:?Ejecute scripts/setup-env.ps1}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:?Ejecute scripts/setup-env.ps1}
       DB_URL: jdbc:postgresql://postgres:5432/users
       DB_USER: users
       DB_PASSWORD: ${DB_PASSWORD}
