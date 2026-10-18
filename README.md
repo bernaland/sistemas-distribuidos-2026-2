@@ -14,8 +14,4 @@ Consulta [inicio, APIs y ejemplos del backend](docs/BACKEND.md) y la [correspond
 
 Pruebas: `./services/mvnw.cmd -B -f services/pom.xml clean verify` (Java 17+, `JAVA_HOME` configurado).
 
-Para iniciar el servicio de front-end, ejecutar los siguientes comandos:
-``` bash
-cd frontend\tienda-frontend;
-npm start
-```
+El frontend queda disponible en `http://localhost:4200` desde Docker y usa una imagen multi-stage (build con Node Alpine + runtime con Nginx Alpine).
