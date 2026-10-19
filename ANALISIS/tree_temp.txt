@@ -1,0 +1,200 @@
+  - .dockerignore
+  - .env.example
+  - .gitignore
+  - AGENTS.md
+  - README.md
+  - REQUERIMIENTOS_MICROSERVICIOS.md
+  - compose.yml
+  - skills-lock.json
+  - **.agents/** (.agents)
+    - **skills/** (.agents/skills)
+      - **angular-developer/** (.agents/skills/angular-developer)
+        - SKILL.md
+        - **references/** (.agents/skills/angular-developer/references)
+          - angular-animations.md
+          - angular-aria.md
+          - cli.md
+          - component-harnesses.md
+          - component-styling.md
+          - components.md
+          - creating-services.md
+          - data-resolvers.md
+          - define-routes.md
+          - defining-providers.md
+          - di-fundamentals.md
+          - e2e-testing.md
+          - effects.md
+          - environment-configuration.md
+          - hierarchical-injectors.md
+          - host-elements.md
+          - http-client.md
+          - injection-context.md
+          - inputs.md
+          - linked-signal.md
+          - loading-strategies.md
+          - mcp.md
+          - migrations.md
+          - naming-conventions.md
+          - navigate-to-routes.md
+          - outputs.md
+          - pipes.md
+          - reactive-forms.md
+          - rendering-strategies.md
+          - resource.md
+          - route-animations.md
+          - route-guards.md
+          - router-lifecycle.md
+          - router-testing.md
+          - show-routes-with-outlets.md
+          - signal-forms.md
+          - signals-overview.md
+          - tailwind-css.md
+          - template-driven-forms.md
+          - testing-fundamentals.md
+      - **angular-testing/** (.agents/skills/angular-testing)
+        - SKILL.md
+      - **code-review/** (.agents/skills/code-review)
+        - SKILL.md
+        - **agents/** (.agents/skills/code-review/agents)
+          - openai.yaml
+      - **frontend-design/** (.agents/skills/frontend-design)
+        - LICENSE.txt
+        - SKILL.md
+      - **image-to-code/** (.agents/skills/image-to-code)
+        - SKILL.md
+      - **java-junit/** (.agents/skills/java-junit)
+        - SKILL.md
+      - **java-microservices/** (.agents/skills/java-microservices)
+        - SKILL.md
+        - **assets/** (.agents/skills/java-microservices/assets)
+          - config.yaml
+          - microservices-checklist.yaml
+          - schema.json
+        - **references/** (.agents/skills/java-microservices/references)
+          - GUIDE.md
+          - PATTERNS.md
+        - **scripts/** (.agents/skills/java-microservices/scripts)
+          - validate.py
+      - **java-springboot/** (.agents/skills/java-springboot)
+        - SKILL.md
+  - **.copilot/** (.copilot)
+    - **instructions/** (.copilot/instructions)
+      - angular.instructions.md
+      - java.instructions.md
+      - postgreSql.instructions.md
+  - **.vscode/** (.vscode)
+    - settings.json
+  - **ANALISIS/** (ANALISIS)
+  - **docs/** (docs)
+    - BACKEND.md
+    - REQUISITOS_BACKEND.md
+    - VALIDACION_BACKEND.md
+    - **superpowers/** (docs/superpowers)
+      - **plans/** (docs/superpowers/plans)
+        - 2026-09-06-microservicios.md
+  - **frontend/** (frontend)
+    - **tienda-frontend/** (frontend/tienda-frontend)
+      - .editorconfig
+      - .gitignore
+      - README.md
+      - angular.json
+      - angular_legacy.json
+      - package-lock.json
+      - package.json
+      - package_legacy.json
+      - tsconfig.app.json
+      - tsconfig.json
+      - tsconfig.spec.json
+      - **src/** (frontend/tienda-frontend/src)
+        - favicon.ico
+        - index.html
+        - main.ts
+        - polyfills.ts
+        - styles.css
+        - **app/** (frontend/tienda-frontend/src/app)
+          - app.component.css
+          - app.component.html
+          - app.component.spec.ts
+          - app.component.ts
+          - app.module.ts
+          - **atoms/** (frontend/tienda-frontend/src/app/atoms)
+            - button.atom.ts
+            - index.ts
+            - input.atom.ts
+            - label.atom.ts
+            - topbar.atom.ts
+          - **molecules/** (frontend/tienda-frontend/src/app/molecules)
+            - form-row.molecule.ts
+            - index.ts
+            - nav-tabs.molecule.ts
+          - **organisms/** (frontend/tienda-frontend/src/app/organisms)
+            - clients.organism.ts
+            - dashboard.organism.ts
+            - index.ts
+            - login.organism.ts
+            - products.organism.ts
+            - providers.organism.ts
+            - reports.organism.ts
+            - sales.organism.ts
+            - users.organism.ts
+          - **pages/** (frontend/tienda-frontend/src/app/pages)
+            - clients.page.ts
+            - dashboard.page.ts
+            - index.ts
+            - login.page.ts
+            - products.page.ts
+            - providers.page.ts
+            - reports.page.ts
+            - sales.page.ts
+            - users.page.ts
+          - **templates/** (frontend/tienda-frontend/src/app/templates)
+            - index.ts
+            - main-layout.template.ts
+        - **assets/** (frontend/tienda-frontend/src/assets)
+          - .gitkeep
+  - **infra/** (infra)
+    - init-databases.sh
+  - **output/** (output)
+    - **documents/** (output/documents)
+      - Informe_Tienda_Generica_Microservicios.docx
+  - **scripts/** (scripts)
+    - check-java-functions.py
+    - generate_inventory.py
+    - setup-env.ps1
+  - **services/** (services)
+    - Dockerfile
+    - mvnw
+    - mvnw.cmd
+    - pom.xml
+    - **.mvn/** (services/.mvn)
+      - **wrapper/** (services/.mvn/wrapper)
+        - maven-wrapper.properties
+    - **admin-service/** (services/admin-service)
+      - Dockerfile
+      - README.md
+      - pom.xml
+      - **src/** (services/admin-service/src)
+        - **main/** (services/admin-service/src/main)
+          - **java/** (services/admin-service/src/main/java)
+            - **com/** (services/admin-service/src/main/java/com)
+              - **uelbosque/** (services/admin-service/src/main/java/com/uelbosque)
+                - **adminservice/** (services/admin-service/src/main/java/com/uelbosque/adminservice)
+                  - AdminServiceApplication.java
+                  - ReportClient.java
+                  - ReportController.java
+                  - ReportService.java
+                  - SalesReport.java
+          - **resources/** (services/admin-service/src/main/resources)
+            - application-distributed.yml
+            - application.yml
+      - **test/** (services/admin-service/test)
+        - **com/** (services/admin-service/test/com)
+          - **uelbosque/** (services/admin-service/test/com/uelbosque)
+            - **adminservice/** (services/admin-service/test/com/uelbosque/adminservice)
+              - EndpointTest.java
+              - ReportServiceTest.java
+    - **cart-service/** (services/cart-service)
+      - Dockerfile
+      - README.md
+      - pom.xml
+      - **src/** (services/cart-service/src)

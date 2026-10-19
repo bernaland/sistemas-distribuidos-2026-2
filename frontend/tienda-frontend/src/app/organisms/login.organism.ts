@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../services';
+import { ButtonAtom, InputAtom, LabelAtom } from '../atoms';
 
 @Component({
   selector: 'organism-login',
+  standalone: true,
+  imports: [FormsModule, LabelAtom, InputAtom, ButtonAtom],
   template: `
     <div class="login-wrapper d-flex align-items-center justify-content-center py-5">
       <div class="tg-card p-4 p-md-5 w-100 login-card animate-fade-in">
@@ -36,16 +41,18 @@ import { Router } from '@angular/router';
             </atom-input>
           </div>
 
-          <div *ngIf="errorMessage" class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-0">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>{{ errorMessage }}</span>
-          </div>
+          @if (errorMessage) {
+            <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-0">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
 
           <div class="d-flex justify-content-between align-items-center text-xs mt-1">
             <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
               <i class="bi bi-shield-check me-1"></i> Sesión Cifrada
             </span>
-            <small class="text-muted">Demo: admin / admin</small>
+            <small class="text-muted">admininicial</small>
           </div>
 
           <div class="d-flex gap-2 justify-content-end mt-3">
@@ -75,22 +82,31 @@ import { Router } from '@angular/router';
       background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
       box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginOrganism {
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
   username = '';
   password = '';
   errorMessage = '';
 
-  constructor(private router: Router) {}
-
   accept(): void {
-    if (!this.username.trim()) {
-      this.errorMessage = 'Por favor ingrese su usuario';
+    if (!this.username.trim() || !this.password) {
+      this.errorMessage = 'Por favor ingrese usuario y contraseña';
       return;
     }
     this.errorMessage = '';
-    this.router.navigate(['/dashboard']);
+    this.authService.login({ username: this.username.trim(), password: this.password }).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: (err) => this.handleLoginError(err)
+    });
+  }
+
+  private handleLoginError(err: { error?: { message?: string } }): void {
+    this.errorMessage = err?.error?.message || 'Error de autenticación. Verifique credenciales.';
   }
 
   cancel(): void {

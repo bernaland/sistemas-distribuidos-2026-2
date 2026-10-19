@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
-
-interface ReportSummary {
-  cedula: string;
-  nombre: string;
-  totalCompras: number;
-}
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { CurrencyPipe, NgClass } from '@angular/common';
+import { ReportService } from '../services';
+import { UserReportRow, CustomerReportRow, CustomerSaleRow } from '../models';
+import { ButtonAtom } from '../atoms';
 
 @Component({
   selector: 'organism-reports',
+  standalone: true,
+  imports: [CurrencyPipe, NgClass, ButtonAtom],
   template: `
     <div class="d-flex flex-column gap-4">
       <div class="tg-card p-4">
@@ -26,77 +26,207 @@ interface ReportSummary {
           </span>
         </div>
 
+        @if (errorMessage()) {
+          <div class="alert alert-danger py-2 px-3 mb-3 small d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-octagon-fill"></i>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
         <div class="d-flex flex-wrap gap-2 mb-4">
-          <atom-button variant="secondary" (onClick)="setReportType('users')">
+          <atom-button [variant]="activeReport() === 'users' ? 'primary' : 'secondary'" (onClick)="setReportType('users')">
             <i class="bi bi-people me-1"></i> Listado de Usuarios
           </atom-button>
-          <atom-button variant="secondary" (onClick)="setReportType('clients')">
+          <atom-button [variant]="activeReport() === 'clients' ? 'primary' : 'secondary'" (onClick)="setReportType('clients')">
             <i class="bi bi-person-lines-fill me-1"></i> Listado de Clientes
           </atom-button>
-          <atom-button variant="primary" (onClick)="setReportType('sales')">
+          <atom-button [variant]="activeReport() === 'sales' ? 'primary' : 'secondary'" (onClick)="setReportType('sales')">
             <i class="bi bi-cash-stack me-1"></i> Ventas por Cliente
           </atom-button>
         </div>
 
         <!-- Sales by Client Report View -->
-        <div *ngIf="activeReport === 'sales'">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="h6 fw-bold mb-0 text-secondary">
-              <i class="bi bi-graph-up me-2 text-primary"></i>Consolidado de Ventas por Cliente
-            </h3>
-            <span class="small text-muted">Corte de mes actual</span>
+        @if (activeReport() === 'sales') {
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6 fw-bold mb-0 text-secondary">
+                <i class="bi bi-graph-up me-2 text-primary"></i>Consolidado de Ventas por Cliente
+              </h3>
+              <span class="small text-muted">Total acumulado en el sistema</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase text-muted">
+                  <tr>
+                    <th>Cédula</th>
+                    <th>Nombre del Cliente</th>
+                    <th class="text-end">Valor Total Compras</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of salesReport(); track row.cedula) {
+                    <tr>
+                      <td class="fw-semibold">{{ row.cedula }}</td>
+                      <td>{{ row.name }}</td>
+                      <td class="text-end fw-bold text-success">
+                        {{ row.totalSales | currency:'USD':'symbol':'1.0-0' }}
+                      </td>
+                    </tr>
+                  }
+                  @if (salesReport().length === 0) {
+                    <tr>
+                      <td colspan="3" class="text-center text-muted py-3">No hay registros de ventas disponibles</td>
+                    </tr>
+                  }
+                </tbody>
+                @if (salesReport().length > 0) {
+                  <tfoot class="table-group-divider">
+                    <tr class="fw-bold table-light">
+                      <td colspan="2" class="text-end">Total General Acumulado:</td>
+                      <td class="text-end text-primary h6 mb-0">{{ grandTotal() | currency:'USD':'symbol':'1.0-0' }}</td>
+                    </tr>
+                  </tfoot>
+                }
+              </table>
+            </div>
           </div>
+        }
 
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-light small text-uppercase text-muted">
-                <tr>
-                  <th>Cédula</th>
-                  <th>Nombre del Cliente</th>
-                  <th class="text-end">Valor Total Compras</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let row of salesReport">
-                  <td class="fw-semibold">{{ row.cedula }}</td>
-                  <td>{{ row.nombre }}</td>
-                  <td class="text-end fw-bold text-success">
-                    {{ row.totalCompras | currency:'USD':'symbol':'1.0-0' }}
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot class="table-group-divider">
-                <tr class="fw-bold table-light">
-                  <td colspan="2" class="text-end">Total General Acumulado:</td>
-                  <td class="text-end text-primary h6 mb-0">{{ grandTotal | currency:'USD':'symbol':'1.0-0' }}</td>
-                </tr>
-              </tfoot>
-            </table>
+        <!-- Users Report View -->
+        @if (activeReport() === 'users') {
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6 fw-bold mb-0 text-secondary">
+                <i class="bi bi-people me-2 text-primary"></i>Directorio de Usuarios del Sistema
+              </h3>
+              <span class="small text-muted">{{ usersReport().length }} usuarios registrados</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase text-muted">
+                  <tr>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Roles</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (u of usersReport(); track u.cedula) {
+                    <tr>
+                      <td class="fw-semibold">{{ u.cedula }}</td>
+                      <td>{{ u.name }}</td>
+                      <td><span class="badge bg-light text-dark border">{{ u.username }}</span></td>
+                      <td class="text-muted small">{{ u.email }}</td>
+                      <td><span class="badge bg-primary-subtle text-primary">{{ u.roles }}</span></td>
+                      <td>
+                        <span class="badge" [ngClass]="u.enabled ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+                          {{ u.enabled ? 'Activo' : 'Inactivo' }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                  @if (usersReport().length === 0) {
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-3">No hay usuarios disponibles</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        }
 
-        <!-- Placeholder for Other Reports -->
-        <div *ngIf="activeReport !== 'sales'" class="p-4 bg-light rounded-3 text-center text-muted">
-          <i class="bi bi-file-earmark-text fs-2 mb-2 d-block text-secondary"></i>
-          <h4 class="h6 fw-bold">Reporte de {{ activeReport === 'users' ? 'Usuarios' : 'Clientes' }}</h4>
-          <p class="small mb-0">Datos sincronizados con la base de datos distribuida PostgreSQL.</p>
-        </div>
+        <!-- Clients Report View -->
+        @if (activeReport() === 'clients') {
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6 fw-bold mb-0 text-secondary">
+                <i class="bi bi-person-lines-fill me-2 text-primary"></i>Listado Oficial de Clientes
+              </h3>
+              <span class="small text-muted">{{ clientsReport().length }} clientes registrados</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-uppercase text-muted">
+                  <tr>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Correo Electrónico</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of clientsReport(); track c.cedula) {
+                    <tr>
+                      <td class="fw-semibold">{{ c.cedula }}</td>
+                      <td>{{ c.name }}</td>
+                      <td>{{ c.phone }}</td>
+                      <td class="text-muted small">{{ c.address }}</td>
+                      <td>{{ c.email }}</td>
+                    </tr>
+                  }
+                  @if (clientsReport().length === 0) {
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-3">No hay clientes disponibles</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
       </div>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReportsOrganism {
-  activeReport: 'users' | 'clients' | 'sales' = 'sales';
+export class ReportsOrganism implements OnInit {
+  private readonly reportService = inject(ReportService);
 
-  salesReport: ReportSummary[] = [
-    { cedula: '1020304050', nombre: 'Distribuidora del Norte', totalCompras: 12450000 },
-    { cedula: '1098765432', nombre: 'Supermercados La Estrella', totalCompras: 5890000 },
-    { cedula: '1018293847', nombre: 'Comercializadora San José', totalCompras: 3420000 }
-  ];
+  readonly activeReport = signal<'users' | 'clients' | 'sales'>('sales');
+  readonly salesReport = signal<CustomerSaleRow[]>([]);
+  readonly usersReport = signal<UserReportRow[]>([]);
+  readonly clientsReport = signal<CustomerReportRow[]>([]);
+  readonly grandTotal = signal(0);
+  readonly errorMessage = signal('');
 
-  grandTotal = 21760000;
+  ngOnInit(): void {
+    this.cargarReporteVentas();
+  }
 
   setReportType(type: 'users' | 'clients' | 'sales'): void {
-    this.activeReport = type;
+    this.activeReport.set(type);
+    this.errorMessage.set('');
+    if (type === 'sales') this.cargarReporteVentas();
+    if (type === 'users') this.cargarReporteUsuarios();
+    if (type === 'clients') this.cargarReporteClientes();
+  }
+
+  private cargarReporteVentas(): void {
+    this.reportService.getSalesByCustomer().subscribe({
+      next: (res) => {
+        this.salesReport.set(res?.customers || []);
+        this.grandTotal.set(res?.grandTotal || 0);
+      },
+      error: () => this.errorMessage.set('No fue posible cargar el reporte de ventas del servidor.')
+    });
+  }
+
+  private cargarReporteUsuarios(): void {
+    this.reportService.getUsers().subscribe({
+      next: (data) => this.usersReport.set(data || []),
+      error: () => this.errorMessage.set('No fue posible cargar el reporte de usuarios del servidor.')
+    });
+  }
+
+  private cargarReporteClientes(): void {
+    this.reportService.getCustomers().subscribe({
+      next: (data) => this.clientsReport.set(data || []),
+      error: () => this.errorMessage.set('No fue posible cargar el reporte de clientes del servidor.')
+    });
   }
 }
