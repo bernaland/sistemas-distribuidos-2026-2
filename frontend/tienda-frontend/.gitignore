@@ -32,10 +32,10 @@ yarn-error.log
 /.angular/cache
 .sass-cache/
 /connect.lock
+# Test outputs
 /coverage
-/libpeerconnection.log
-testem.log
-/typings
+/test-results
+/playwright-report
 
 # System files
 .DS_Store

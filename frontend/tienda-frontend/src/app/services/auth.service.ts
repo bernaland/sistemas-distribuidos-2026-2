@@ -37,7 +37,6 @@ export class AuthService {
 
   getToken(): string | null {
     if (this.isTokenExpired()) {
-      this.logout();
       return null;
     }
     return this.tokenSignal();

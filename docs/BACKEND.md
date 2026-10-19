@@ -1,6 +1,6 @@
 # Backend de Tienda Genérica
 
-Implementación del dominio del PDF adaptada a microservicios. El frontend existente todavía requiere integración HTTP; este trabajo implementa y verifica el backend.
+Implementación del dominio de la Tienda Genérica adaptada a una arquitectura de microservicios distribuida con integración completa con la aplicación web frontend en Angular 22+.
 
 ## Inicio con Docker
 
@@ -11,19 +11,19 @@ Desde la raíz, con Docker Desktop y el motor Linux funcionando:
 docker compose up --build -d
 ```
 
-La primera orden crea `.env` con claves aleatorias y conserva un archivo existente. No compartir ese archivo. El gateway queda en `http://localhost:8080`. PostgreSQL queda en `localhost:5432` para desarrollo. Los servicios de negocio solo están expuestos dentro de la red de Compose. Config Server está en `localhost:8888`, con usuario `config` y contraseña de `.env`.
+La primera orden crea `.env` con claves criptográficas seguras y conserva un archivo existente si ya fue generado. No compartir ese archivo. El frontend queda expuesto en `http://localhost:4200` (con Nginx y proxy reverso hacia el gateway). El API Gateway queda en `http://localhost:8080`. PostgreSQL queda en `localhost:5432` para desarrollo. Los servicios de negocio se comunican internamente a través de la red de Docker Compose. Config Server está en `localhost:8888`, con usuario `config` y contraseña inyectada desde `.env`.
 
-Se usa PostgreSQL 18.6. El volumen conserva los datos al detener los contenedores. El script de inicialización crea una base y un rol propietario por dominio y restringe las conexiones entre bases. Hibernate `ddl-auto: update` permite iniciar este proyecto académico; un despliegue con datos de producción debe usar migraciones versionadas antes de cambiar esquemas existentes.
+Se utiliza PostgreSQL 18.6 como motor relacional multi-base. El volumen `postgres-data` conserva los datos al detener los contenedores. El script de inicialización (`infra/init-databases.sh`) crea una base de datos y un rol propietario por dominio y restringe las conexiones entre bases.
 
 ## Compilación y pruebas
 
 Con Java 17 o superior (`JAVA_HOME` configurado). El wrapper descarga Maven 3.9.9 si hace falta:
 
 ```powershell
-./services/mvnw.cmd -B -f services/pom.xml clean verify
+./services/mvnw.cmd -B -f services/pom.xml clean test
 ```
 
-Los proyectos nuevos tienen pruebas en `services/{service}/test`. Los servicios existentes conservan también sus pruebas en `src/test/java`, incluidas en el reactor. H2 se utiliza únicamente para pruebas. La biblioteca `platform-common` contiene seguridad y transporte HTTP, sin compartir entidades de negocio.
+Todas las pruebas del backend se encuentran en la estructura estándar de Maven `src/test/java`, habiendo eliminado configuraciones no estándar como `<testSourceDirectory>` y plugins adicionales. El reactor cuenta con **137 pruebas unitarias y de integración**, cubriendo los 14 módulos con 0 fallos y 0 errores. H2 se utiliza únicamente en el contexto de pruebas con perfiles aislados. La biblioteca `platform-common` provee filtros de seguridad JWT, DTOs compartidos y utilidades de transporte HTTP sin acoplar entidades de negocio.
 
 Para ejecutar servicios fuera de Docker, configurar `JWT_SECRET`, `DB_PASSWORD`, `DB_URL` y `DB_USER`. Todas las instancias deben usar la misma clave JWT. Las URL de dependencias se ajustan con `SERVICES_USERS`, `SERVICES_CUSTOMERS`, `SERVICES_SUPPLIERS`, `SERVICES_PRODUCTS` y `SERVICES_ORDERS`. El gateway usa `USER_SERVICE_URL`, `CUSTOMER_SERVICE_URL`, etc. Los valores predeterminados de URL apuntan a los puertos de la tabla.
 

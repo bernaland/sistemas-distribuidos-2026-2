@@ -7,12 +7,6 @@
       "skillPath": "skills/dev-skills/angular-developer/SKILL.md",
       "computedHash": "b20b0c586bdc14f88265377031fad8f1763d899b64caca3a10ddf24cb5ac8e77"
     },
-    "angular-testing": {
-      "source": "analogjs/angular-skills",
-      "sourceType": "github",
-      "skillPath": "skills/angular-testing/SKILL.md",
-      "computedHash": "61e3d3ab9ea2f79aed53a46119fa860a013ca8170478fd90266e027eacfb242c"
-    },
     "code-review": {
       "source": "mattpocock/skills",
       "sourceType": "github",

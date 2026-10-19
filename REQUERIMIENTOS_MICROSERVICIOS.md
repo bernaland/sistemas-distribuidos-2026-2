@@ -1,26 +1,39 @@
-# Requerimientos de Tienda Genérica en microservicios
+# Requerimientos de Tienda Genérica en Microservicios
 
-Esta especificación reemplaza la propuesta inicial de comercio electrónico. El alcance funcional se basa en el PDF de Tienda Genérica y en la revisión autorizada; no se limita a sus primeras 25 páginas.
+Esta especificación formaliza los requisitos funcionales, técnicos y de arquitectura implementados en la plataforma distribuida de la Tienda Genérica.
 
-## Dominio obligatorio
+## 1. Dominio Obligatorio Implementado
 
-- Usuarios: autenticación, cédula única, CRUD, administración protegida y desactivación del usuario inicial.
-- Clientes: CRUD de cédula, nombre, dirección, teléfono y correo.
-- Proveedores: CRUD de NIT, nombre, dirección, teléfono y ciudad.
-- Catálogo: productos y carga CSV de seis columnas; validar proveedores y reemplazar los productos atómicamente.
-- Ventas: cliente por cédula, operador autenticado, uno a tres renglones, precios del catálogo, IVA individual, consecutivo y detalle persistente.
-- Reportes: usuarios, clientes y total de ventas por cliente con consolidado.
+- **Usuarios (`user-service`)**: Autenticación JWT con cifrado BCrypt, control de cédula única, operaciones CRUD, inicialización segura vía variable de entorno `ADMIN_INITIAL_PASSWORD`, y protección que impide desactivar al último administrador.
+- **Clientes (`customer-service`)**: Operaciones CRUD completas con atributos obligatorios (cédula única, nombre, dirección, teléfono, correo) y validaciones de formato.
+- **Proveedores (`supplier-service`)**: Operaciones CRUD completas con atributos obligatorios (NIT comercial, nombre, dirección, teléfono, ciudad) y validación de existencia.
+- **Catálogo (`catalog-service`)**: Gestión de productos e importación masiva mediante archivo CSV de 6 columnas (`codigo_producto`, `nombre_producto`, `nitproveedor`, `precio_compra`, `ivacompra`, `precio_venta`), con verificación previa de proveedores y reemplazo transaccional atómico.
+- **Ventas (`order-service`)**: Validación previa de cliente y productos, cálculo dinámico de subtotal e IVA por producto, soporte de 1 a 3 renglones por factura, asignación de consecutivo autoincremental, idempotencia de transacciones (`Idempotency-Key`) y persistencia de cabecera con detalle de venta.
+- **Reportes (`admin-service`)**: Consolidación y auditoría de datos del sistema para: listado de usuarios, listado de clientes, y ventas por cliente con sumatoria de gran total acumulado.
 
-## Distribución
+## 2. Distribución y Servicios de Apoyo
 
-Los dominios anteriores se implementan en user-service, customer-service, supplier-service, catalog-service, order-service y admin-service. Cada servicio persistente es propietario de su base PostgreSQL. La información entre dominios se consulta por HTTP; ventas y detalle se guardan en una sola transacción local.
+- **Infraestructura Base**:
+  - `gateway`: Punto de entrada único que enruta tráfico hacia los microservicios backend y valida tokens JWT.
+  - `config-server`: Servidor de configuración centralizada con perfil `distributed` protegido por HTTP Basic.
+  - `platform-common`: Componente compartido para seguridad, filtros JWT y utilidades de transporte.
+- **Servicios Auxiliares Existentes**:
+  - `inventory-service`: Gestión de existencias y reservas de inventario.
+  - `cart-service`: Operaciones de carrito de compras por identificador de usuario.
+  - `payment-service`: Simulación y registro de transacciones de pago.
+  - `notification-service`: Generación de notificaciones de pedidos y eventos.
 
-API Gateway enruta solicitudes. Config Server distribuye configuración no secreta. JWT protege los servicios. Las claves y las credenciales se inyectan por entorno.
+## 3. Frontend Integrado (Angular 22+)
 
-Inventario, carrito, pagos simulados y notificaciones son servicios auxiliares existentes que también se implementan. No sustituyen los módulos obligatorios y no hay un cobro externo ni envío de correo automático al registrar ventas.
+- Arquitectura Atomic Design completa: componentes modulares divididos en atoms, molecules, 8 organisms, templates y pages.
+- Enrutamiento con lazy loading y protección mediante Functional Guards (`authGuard`, `roleGuard`).
+- Reactividad moderna basada en Signals y nuevo control flow de Angular (`@if`, `@for`).
+- Manejo integral de errores con interceptor funcional (401 redirección a login, 400/409 exposición de validaciones, 503 servicio no disponible).
+- Suite de pruebas unitarias con cobertura del **89.98% en líneas** y pruebas E2E con Playwright.
 
-## Stack y validación
+## 4. Stack y Validación
 
-Java 17+, Spring Boot, PostgreSQL 18.6 y pruebas JUnit por servicio. H2 se utiliza solo en las pruebas. El frontend Angular permanece pendiente de integración con las APIs de este incremento.
-
-El funcionamiento, los contratos HTTP, los permisos y las limitaciones se documentan en [docs/BACKEND.md](docs/BACKEND.md). La correspondencia con historias del PDF está en [docs/REQUISITOS_BACKEND.md](docs/REQUISITOS_BACKEND.md).
+- **Backend**: Java 17+, Spring Boot, 14 módulos Maven en reactor con **137 pruebas unitarias/integración** en `src/test/java`.
+- **Frontend**: Angular 22, TypeScript, Bootstrap 5, **65 pruebas unitarias** (Karma/Jasmine) y **5 pruebas E2E** (Playwright).
+- **Base de Datos**: PostgreSQL 18.6 con separación física por esquema/rol de dominio en Docker Compose.
+- **Integración Continua**: Pipeline de GitHub Actions (`.github/workflows/ci.yml`) que compila y prueba automáticamente backend y frontend.
