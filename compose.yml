@@ -1,4 +1,4 @@
-name: tienda-generica
+﻿name: tienda-generica
 
 x-service-common-env: &service-common-env
   SPRING_PROFILES_ACTIVE: distributed
@@ -36,355 +36,265 @@ services:
       timeout: 3s
       retries: 20
 
-  config-server-1:
+  config-server:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: config-server
+    image: tienda-generica-config-server:latest
     environment:
       CONFIG_PASSWORD: ${CONFIG_PASSWORD:?Ejecute scripts/setup-env.ps1}
-  config-server-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: config-server
-    environment:
-      CONFIG_PASSWORD: ${CONFIG_PASSWORD:?Ejecute scripts/setup-env.ps1}
+    deploy:
+      replicas: 2
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   config-server-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/config-server-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - config-server-1
-      - config-server-2
+      - config-server
     ports: ["127.0.0.1:8888:8888"]
 
-  user-service-1:
+  user-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: user-service
+    image: tienda-generica-user-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/users
       DB_USER: users
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  user-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: user-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/users
-      DB_USER: users
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   user-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/user-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - user-service-1
-      - user-service-2
+      - user-service
 
-  catalog-service-1:
+  catalog-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: catalog-service
+    image: tienda-generica-catalog-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/catalog
       DB_USER: catalog
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  catalog-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: catalog-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/catalog
-      DB_USER: catalog
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   catalog-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/catalog-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - catalog-service-1
-      - catalog-service-2
+      - catalog-service
 
-  inventory-service-1:
+  inventory-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: inventory-service
+    image: tienda-generica-inventory-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/inventory
       DB_USER: inventory
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  inventory-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: inventory-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/inventory
-      DB_USER: inventory
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   inventory-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/inventory-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - inventory-service-1
-      - inventory-service-2
+      - inventory-service
 
-  cart-service-1:
+  cart-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: cart-service
+    image: tienda-generica-cart-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/carts
       DB_USER: carts
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  cart-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: cart-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/carts
-      DB_USER: carts
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   cart-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/cart-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - cart-service-1
-      - cart-service-2
+      - cart-service
 
-  order-service-1:
+  order-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: order-service
+    image: tienda-generica-order-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/orders
       DB_USER: orders
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  order-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: order-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/orders
-      DB_USER: orders
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   order-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/order-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - order-service-1
-      - order-service-2
+      - order-service
 
-  payment-service-1:
+  payment-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: payment-service
+    image: tienda-generica-payment-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/payments
       DB_USER: payments
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  payment-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: payment-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/payments
-      DB_USER: payments
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   payment-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/payment-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - payment-service-1
-      - payment-service-2
+      - payment-service
 
-  notification-service-1:
+  notification-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: notification-service
+    image: tienda-generica-notification-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/notifications
       DB_USER: notifications
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  notification-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: notification-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/notifications
-      DB_USER: notifications
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   notification-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/notification-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - notification-service-1
-      - notification-service-2
+      - notification-service
 
-  admin-service-1:
+  admin-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: admin-service
+    image: tienda-generica-admin-service:latest
     environment:
       <<: *service-common-env
     depends_on:
       config-server-lb:
         condition: service_started
-  admin-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: admin-service
-    environment:
-      <<: *service-common-env
-    depends_on:
-      config-server-lb:
-        condition: service_started
+    deploy:
+      replicas: 2
+
   admin-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/admin-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - admin-service-1
-      - admin-service-2
+      - admin-service
 
-  customer-service-1:
+  customer-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: customer-service
+    image: tienda-generica-customer-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/customers
       DB_USER: customers
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  customer-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: customer-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/customers
-      DB_USER: customers
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   customer-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/customer-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - customer-service-1
-      - customer-service-2
+      - customer-service
 
-  supplier-service-1:
+  supplier-service:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: supplier-service
+    image: tienda-generica-supplier-service:latest
     environment:
       <<: *service-common-env
       DB_URL: jdbc:postgresql://postgres:5432/suppliers
       DB_USER: suppliers
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on: *service-depends-on
-  supplier-service-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: supplier-service
-    environment:
-      <<: *service-common-env
-      DB_URL: jdbc:postgresql://postgres:5432/suppliers
-      DB_USER: suppliers
-      DB_PASSWORD: ${DB_PASSWORD}
-    depends_on: *service-depends-on
+    deploy:
+      replicas: 2
+
   supplier-service-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/supplier-service-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - supplier-service-1
-      - supplier-service-2
+      - supplier-service
 
-  gateway-1:
+  gateway:
     build:
       context: .
       dockerfile: services/Dockerfile
       args:
         SERVICE: gateway
+    image: tienda-generica-gateway:latest
     environment:
       SPRING_PROFILES_ACTIVE: distributed
       CONFIG_SERVER_URL: http://config-server-lb:8888
@@ -403,43 +313,22 @@ services:
     depends_on:
       config-server-lb:
         condition: service_started
-  gateway-2:
-    build:
-      context: .
-      dockerfile: services/Dockerfile
-      args:
-        SERVICE: gateway
-    environment:
-      SPRING_PROFILES_ACTIVE: distributed
-      CONFIG_SERVER_URL: http://config-server-lb:8888
-      SPRING_CLOUD_CONFIG_USERNAME: config
-      SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASSWORD}
-      USER_SERVICE_URL: http://user-service-lb:8081
-      CATALOG_SERVICE_URL: http://catalog-service-lb:8082
-      INVENTORY_SERVICE_URL: http://inventory-service-lb:8083
-      CART_SERVICE_URL: http://cart-service-lb:8084
-      ORDER_SERVICE_URL: http://order-service-lb:8085
-      PAYMENT_SERVICE_URL: http://payment-service-lb:8086
-      NOTIFICATION_SERVICE_URL: http://notification-service-lb:8087
-      ADMIN_SERVICE_URL: http://admin-service-lb:8088
-      CUSTOMER_SERVICE_URL: http://customer-service-lb:8089
-      SUPPLIER_SERVICE_URL: http://supplier-service-lb:8090
-    depends_on:
-      config-server-lb:
-        condition: service_started
+    deploy:
+      replicas: 2
+
   gateway-lb:
     image: nginx:1.27-alpine
     volumes:
       - ./infra/nginx/gateway-lb.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - gateway-1
-      - gateway-2
+      - gateway
     ports: ["127.0.0.1:8080:8080"]
 
   tienda-frontend:
     build:
       context: .
       dockerfile: frontend/tienda-frontend/Dockerfile
+    image: tienda-generica-frontend:latest
     depends_on:
       gateway-lb:
         condition: service_started
