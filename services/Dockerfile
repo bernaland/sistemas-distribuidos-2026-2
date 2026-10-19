@@ -1,8 +1,8 @@
-FROM maven:3.9.9-eclipse-temurin-17 AS build
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
 WORKDIR /workspace
 COPY services/ services/
 RUN mvn -B -f services/pom.xml package -DskipTests
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-alpine
 ARG SERVICE
 WORKDIR /app
 COPY --from=build /workspace/services/${SERVICE}/target/*.jar app.jar

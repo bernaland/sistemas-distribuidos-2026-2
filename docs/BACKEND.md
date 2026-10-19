@@ -8,10 +8,18 @@ Desde la raíz, con Docker Desktop y el motor Linux funcionando:
 
 ```powershell
 ./scripts/setup-env.ps1
-docker compose up --build -d
+./scripts/start-friendly.ps1 -Build
 ```
 
-La primera orden crea `.env` con claves aleatorias y conserva un archivo existente. No compartir ese archivo. El gateway queda en `http://localhost:8080`. PostgreSQL queda en `localhost:5432` para desarrollo. Los servicios de negocio solo están expuestos dentro de la red de Compose. Config Server está en `localhost:8888`, con usuario `config` y contraseña de `.env`.
+La primera orden crea `.env` con claves aleatorias y conserva un archivo existente. No compartir ese archivo. El script de arranque ejecuta un único `docker compose up` por corrida y permite filtrar por servicio en corridas posteriores. Además, Compose limita el pool JDBC por réplica para evitar agotar conexiones de PostgreSQL al ejecutar dos instancias por servicio. El gateway queda en `http://localhost:8080`. PostgreSQL queda en `localhost:5432` para desarrollo. Los servicios de negocio solo están expuestos dentro de la red de Compose. Config Server está en `localhost:8888`, con usuario `config` y contraseña de `.env`.
+
+Si necesitas repetir el despliegue para un único servicio, usa el filtro:
+
+```powershell
+./scripts/start-friendly.ps1 -Service user-service
+```
+
+Cada microservicio corre con dos instancias (`{servicio}-1` y `{servicio}-2`) detrás de su balanceador Nginx (`{servicio}-lb`). La comunicación interna usa siempre los hostnames `*-lb`. El frontend también se construye y sirve en Docker con una imagen multi-stage basada en Alpine y queda expuesto en `http://localhost:4200`.
 
 Se usa PostgreSQL 18.6. El volumen conserva los datos al detener los contenedores. El script de inicialización crea una base y un rol propietario por dominio y restringe las conexiones entre bases. Hibernate `ddl-auto: update` permite iniciar este proyecto académico; un despliegue con datos de producción debe usar migraciones versionadas antes de cambiar esquemas existentes.
 
