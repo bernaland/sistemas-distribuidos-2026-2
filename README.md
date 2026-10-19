@@ -7,7 +7,13 @@ Los servicios cubren usuarios, clientes, proveedores, catálogo CSV, ventas, rep
 
 ```powershell
 ./scripts/setup-env.ps1
-docker compose up --build -d
+./scripts/start-friendly.ps1 -Build
+```
+
+Para desplegar solo un servicio en corridas posteriores:
+
+```powershell
+./scripts/start-friendly.ps1 -Service user-service
 ```
 
 Consulta [inicio, APIs y ejemplos del backend](docs/BACKEND.md) y la [correspondencia con el PDF](docs/REQUISITOS_BACKEND.md). Las pantallas existentes todavía requieren integración con estas APIs.

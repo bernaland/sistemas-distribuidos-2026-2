@@ -5,6 +5,8 @@ x-service-common-env: &service-common-env
   CONFIG_SERVER_URL: http://config-server-lb:8888
   SPRING_CLOUD_CONFIG_USERNAME: config
   SPRING_CLOUD_CONFIG_PASSWORD: ${CONFIG_PASSWORD}
+  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+  SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
   JWT_SECRET: ${JWT_SECRET:?Ejecute scripts/setup-env.ps1}
   SERVICES_USERS: http://user-service-lb:8081
   SERVICES_CUSTOMERS: http://customer-service-lb:8089
