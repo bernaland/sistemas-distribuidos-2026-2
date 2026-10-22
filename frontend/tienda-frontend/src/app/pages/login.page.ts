@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { LoginOrganism } from '../organisms';
 
 @Component({
   selector: 'page-login',
-  template: `<organism-login></organism-login>`
+  standalone: true,
+  imports: [LoginOrganism],
+  template: `<organism-login></organism-login>`,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPage {}

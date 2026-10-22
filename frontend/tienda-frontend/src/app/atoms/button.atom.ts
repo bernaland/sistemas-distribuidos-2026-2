@@ -1,18 +1,20 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'atom-button',
-  template: `
+    selector: 'atom-button',
+    template: `
     <button
       [type]="type"
       [disabled]="disabled"
       [class]="getButtonClass()"
       (click)="onClick.emit($event)">
-      <i *ngIf="icon" [class]="'bi ' + icon + ' me-1'"></i>
+      @if (icon) {
+        <i [class]="'bi ' + icon + ' me-1'"></i>
+      }
       <ng-content></ng-content>
     </button>
-  `,
-  styles: [`
+    `,
+    styles: [`
     button {
       display: inline-flex;
       align-items: center;
@@ -24,7 +26,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
     button:active {
       transform: scale(0.98) translateY(0) !important;
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: true
 })
 export class ButtonAtom {
   @Input() variant: 'primary' | 'secondary' | 'danger' | 'outline' = 'primary';

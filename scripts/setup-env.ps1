@@ -9,6 +9,6 @@ function New-Secret {
     $generator.Dispose()
     return ([BitConverter]::ToString($bytes)).Replace('-', '').ToLowerInvariant()
 }
-$entries = @('JWT_SECRET', 'DB_PASSWORD', 'POSTGRES_PASSWORD', 'CONFIG_PASSWORD') | ForEach-Object { "$_=$(New-Secret)" }
+$entries = @('JWT_SECRET', 'DB_PASSWORD', 'POSTGRES_PASSWORD', 'CONFIG_PASSWORD', 'ADMIN_INITIAL_PASSWORD') | ForEach-Object { "$_=$(New-Secret)" }
 [System.IO.File]::WriteAllLines($envPath, $entries)
 Write-Output '.env creado con claves aleatorias. No lo publiques.'

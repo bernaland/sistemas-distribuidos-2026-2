@@ -1,8 +1,12 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { NavTabsMolecule } from '../molecules/nav-tabs.molecule';
+import { AuthService } from '../services';
 
 @Component({
   selector: 'app-main-layout',
+  standalone: true,
+  imports: [NavTabsMolecule, RouterOutlet],
   template: `
     <div class="min-vh-100 d-flex flex-column">
       <header class="main-header py-3 px-3 px-md-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -17,13 +21,19 @@ import { Router } from '@angular/router';
         </div>
 
         <div class="d-flex align-items-center gap-2">
-          <div class="d-none d-md-flex flex-column text-end">
-            <span class="fw-semibold small text-dark">Administrador Central</span>
-            <span class="text-muted text-xs" style="font-size: 0.75rem;">admin&#64;tiendagenerica.com</span>
-          </div>
-          <button (click)="goToLogin()" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 ms-2" title="Cerrar Sesión / Ir al Login">
-            <i class="bi bi-box-arrow-right me-1"></i> Salir
-          </button>
+          @if (authService.isAuthenticated()) {
+            <div class="d-none d-md-flex flex-column text-end">
+              <span class="fw-semibold small text-dark">{{ authService.currentUser()?.name || authService.currentUser()?.username }}</span>
+              <span class="text-muted text-xs" style="font-size: 0.75rem;">{{ authService.currentUser()?.roles || 'Usuario' }}</span>
+            </div>
+            <button (click)="logout()" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 ms-2" title="Cerrar Sesión">
+              <i class="bi bi-box-arrow-right me-1"></i> Salir
+            </button>
+          } @else {
+            <button (click)="goToLogin()" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 ms-2" title="Iniciar Sesión">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
+            </button>
+          }
         </div>
       </header>
 
@@ -66,10 +76,17 @@ import { Router } from '@angular/router';
       backdrop-filter: blur(8px);
       border-color: rgba(226, 232, 240, 0.8) !important;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainLayoutTemplate {
-  constructor(private router: Router) {}
+  readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 
   goToLogin(): void {
     this.router.navigate(['/']);

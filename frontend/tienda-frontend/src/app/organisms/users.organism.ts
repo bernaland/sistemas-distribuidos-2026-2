@@ -1,16 +1,13 @@
-import { Component } from '@angular/core';
-
-interface UserRecord {
-  cedula: string;
-  nombre: string;
-  correo: string;
-  usuario: string;
-  rol: string;
-  activo: boolean;
-}
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { UserService } from '../services';
+import { User } from '../models';
+import { ButtonAtom, InputAtom, LabelAtom } from '../atoms';
 
 @Component({
   selector: 'organism-users',
+  standalone: true,
+  imports: [NgClass, ButtonAtom, InputAtom, LabelAtom],
   template: `
     <div class="d-flex flex-column gap-4">
       <!-- Form Card -->
@@ -26,14 +23,16 @@ interface UserRecord {
             </div>
           </div>
           <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
-            <i class="bi bi-people-fill me-1"></i> {{ usersList.length }} Registrados
+            <i class="bi bi-people-fill me-1"></i> {{ usersList().length }} Registrados
           </span>
         </div>
 
-        <div *ngIf="notification" [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notification.type">
-          <i class="bi bi-info-circle-fill"></i>
-          <span>{{ notification.text }}</span>
-        </div>
+        @if (notification(); as notif) {
+          <div [class]="'alert py-2 px-3 mb-3 d-flex align-items-center gap-2 ' + notif.type">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>{{ notif.text }}</span>
+          </div>
+        }
 
         <div class="row g-3">
           <div class="col-md-6 col-12">
@@ -97,23 +96,25 @@ interface UserRecord {
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of usersList" (click)="selectUser(u)" role="button" class="user-table-row">
-                <td class="fw-semibold text-dark">{{ u.cedula }}</td>
-                <td>{{ u.nombre }}</td>
-                <td><span class="badge bg-light text-dark border">{{ u.usuario }}</span></td>
-                <td class="text-muted small">{{ u.correo }}</td>
-                <td><span class="badge bg-primary-subtle text-primary">{{ u.rol }}</span></td>
-                <td>
-                  <span class="badge bg-success-subtle text-success border border-success-subtle">
-                    <span class="status-dot-pulse me-1"></span> Activo
-                  </span>
-                </td>
-                <td class="text-end">
-                  <button class="btn btn-sm btn-outline-primary rounded-circle" title="Cargar">
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-                </td>
-              </tr>
+              @for (u of usersList(); track u.id) {
+                <tr (click)="selectUser(u)" role="button" class="user-table-row">
+                  <td class="fw-semibold text-dark">{{ u.cedula }}</td>
+                  <td>{{ u.name }}</td>
+                  <td><span class="badge bg-light text-dark border">{{ u.username }}</span></td>
+                  <td class="text-muted small">{{ u.email }}</td>
+                  <td><span class="badge bg-primary-subtle text-primary">{{ u.roles }}</span></td>
+                  <td>
+                    <span class="badge" [ngClass]="u.enabled !== false ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border'">
+                      <span class="status-dot-pulse me-1"></span> {{ u.enabled !== false ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary rounded-circle" title="Cargar">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
@@ -127,39 +128,54 @@ interface UserRecord {
     .user-table-row:hover {
       background-color: rgba(79, 70, 229, 0.04) !important;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UsersOrganism {
+export class UsersOrganism implements OnInit {
+  private readonly userService = inject(UserService);
+
   cedula = '';
   nombre = '';
   correo = '';
   usuario = '';
   contrasena = '';
-  notification: { text: string; type: string } | null = null;
+  selectedId: number | null = null;
+  readonly notification = signal<{ text: string; type: string } | null>(null);
+  readonly usersList = signal<User[]>([]);
 
-  usersList: UserRecord[] = [
-    { cedula: '1001234567', nombre: 'Samuel Admin', correo: 'admin@tiendagenerica.com', usuario: 'admin', rol: 'Administrador', activo: true },
-    { cedula: '1009876543', nombre: 'Valeria Gómez', correo: 'valeria.gomez@tiendagenerica.com', usuario: 'vgomez', rol: 'Ventas', activo: true },
-    { cedula: '1014567890', nombre: 'Carlos Rodríguez', correo: 'carlos.r@tiendagenerica.com', usuario: 'crodriguez', rol: 'Almacén', activo: true }
-  ];
+  ngOnInit(): void {
+    this.cargarUsuarios();
+  }
 
-  selectUser(user: UserRecord): void {
+  cargarUsuarios(): void {
+    this.userService.list().subscribe({
+      next: (data) => this.usersList.set(data),
+      error: () => this.setNotification('Error al cargar usuarios del servidor', 'alert-danger')
+    });
+  }
+
+  selectUser(user: User): void {
+    this.selectedId = user.id || null;
     this.cedula = user.cedula;
-    this.nombre = user.nombre;
-    this.correo = user.correo;
-    this.usuario = user.usuario;
+    this.nombre = user.name;
+    this.correo = user.email;
+    this.usuario = user.username;
     this.contrasena = '••••••••';
-    this.setNotification(`Usuario ${user.usuario} seleccionado`, 'alert-info');
+    this.setNotification(`Usuario ${user.username} seleccionado`, 'alert-info');
   }
 
   consultar(): void {
-    const found = this.usersList.find(u => u.cedula === this.cedula || u.usuario === this.usuario);
-    if (found) {
-      this.selectUser(found);
-      this.setNotification(`Usuario ${found.nombre} encontrado exitosamente`, 'alert-success');
-    } else {
-      this.setNotification('No se encontró ningún usuario con ese criterio', 'alert-warning');
+    if (!this.cedula.trim()) {
+      this.setNotification('Ingrese una cédula para consultar', 'alert-warning');
+      return;
     }
+    this.userService.getByCedula(this.cedula.trim()).subscribe({
+      next: (u) => {
+        this.selectUser(u);
+        this.setNotification(`Usuario ${u.name} encontrado`, 'alert-success');
+      },
+      error: () => this.setNotification('Usuario no encontrado con esa cédula', 'alert-warning')
+    });
   }
 
   crear(): void {
@@ -167,40 +183,72 @@ export class UsersOrganism {
       this.setNotification('Por favor complete cédula, usuario y nombre', 'alert-warning');
       return;
     }
-    this.usersList.push({
-      cedula: this.cedula,
-      nombre: this.nombre,
-      correo: this.correo || `${this.usuario}@tiendagenerica.com`,
-      usuario: this.usuario,
-      rol: 'Operador',
-      activo: true
+    const payload = this.buildCreatePayload();
+    this.userService.create(payload).subscribe({
+      next: (created) => {
+        this.setNotification(`Usuario ${created.username} registrado`, 'alert-success');
+        this.resetForm();
+        this.cargarUsuarios();
+      },
+      error: (err) => this.handleError(err, 'Error al crear usuario')
     });
-    this.setNotification(`Usuario ${this.usuario} registrado correctamente`, 'alert-success');
-    this.resetForm();
   }
 
   actualizar(): void {
-    const index = this.usersList.findIndex(u => u.cedula === this.cedula || u.usuario === this.usuario);
-    if (index >= 0) {
-      this.usersList[index] = { ...this.usersList[index], nombre: this.nombre, correo: this.correo };
-      this.setNotification(`Usuario ${this.usuario} actualizado`, 'alert-success');
-    } else {
+    if (!this.selectedId) {
       this.setNotification('Seleccione un usuario existente para actualizar', 'alert-warning');
+      return;
     }
+    const payload = this.buildUpdatePayload();
+    this.userService.update(this.selectedId, payload).subscribe({
+      next: (updated) => {
+        this.setNotification(`Usuario ${updated.username} actualizado`, 'alert-success');
+        this.cargarUsuarios();
+      },
+      error: (err) => this.handleError(err, 'Error al actualizar usuario')
+    });
   }
 
   borrar(): void {
-    const prevLen = this.usersList.length;
-    this.usersList = this.usersList.filter(u => u.cedula !== this.cedula && u.usuario !== this.usuario);
-    if (this.usersList.length < prevLen) {
-      this.setNotification('Usuario eliminado exitosamente', 'alert-danger');
-      this.resetForm();
-    } else {
-      this.setNotification('Usuario no encontrado para borrar', 'alert-warning');
+    if (!this.selectedId) {
+      this.setNotification('Seleccione un usuario para borrar', 'alert-warning');
+      return;
     }
+    this.userService.delete(this.selectedId).subscribe({
+      next: () => {
+        this.setNotification('Usuario eliminado exitosamente', 'alert-danger');
+        this.resetForm();
+        this.cargarUsuarios();
+      },
+      error: (err) => this.handleError(err, 'Error al eliminar usuario')
+    });
+  }
+
+  private buildCreatePayload() {
+    return {
+      cedula: this.cedula,
+      username: this.usuario,
+      password: this.contrasena && this.contrasena !== '••••••••' ? this.contrasena : 'ClaveSegura123',
+      name: this.nombre,
+      email: this.correo || `${this.usuario}@tiendagenerica.com`,
+      roles: 'ROLE_USER'
+    };
+  }
+
+  private buildUpdatePayload() {
+    return {
+      username: this.usuario,
+      name: this.nombre,
+      email: this.correo
+    };
+  }
+
+  private handleError(err: { error?: { message?: string } }, fallback: string): void {
+    this.setNotification(err?.error?.message || fallback, 'alert-danger');
   }
 
   private resetForm(): void {
+    this.selectedId = null;
     this.cedula = '';
     this.nombre = '';
     this.correo = '';
@@ -209,6 +257,6 @@ export class UsersOrganism {
   }
 
   private setNotification(text: string, type: string): void {
-    this.notification = { text, type };
+    this.notification.set({ text, type });
   }
 }

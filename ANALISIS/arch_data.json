@@ -1,0 +1,416 @@
+{
+  "entities": [
+    {
+      "file": "services/cart-service/src/main/java/com/uelbosque/cartservice/model/Cart.java",
+      "class": "Cart",
+      "table": "carts",
+      "fields": [
+        "Long id",
+        "String userId",
+        "BigDecimal subtotal = BigDecimal.ZERO",
+        "BigDecimal taxTotal = BigDecimal.ZERO",
+        "BigDecimal discountTotal = BigDecimal.ZERO",
+        "BigDecimal grandTotal = BigDecimal.ZERO"
+      ]
+    },
+    {
+      "file": "services/cart-service/src/main/java/com/uelbosque/cartservice/model/CartItem.java",
+      "class": "CartItem",
+      "table": "cart_items",
+      "fields": [
+        "Long id",
+        "Cart cart",
+        "String productCode",
+        "String productName",
+        "BigDecimal unitPrice",
+        "Integer quantity",
+        "BigDecimal itemSubtotal"
+      ]
+    },
+    {
+      "file": "services/catalog-service/src/main/java/com/uelbosque/catalogservice/CatalogWriteLock.java",
+      "class": "CatalogWriteLock",
+      "table": "catalogwritelock",
+      "fields": []
+    },
+    {
+      "file": "services/catalog-service/src/main/java/com/uelbosque/catalogservice/model/Product.java",
+      "class": "Product",
+      "table": "products",
+      "fields": [
+        "String supplierNit",
+        "Long id",
+        "String code",
+        "String name",
+        "String description",
+        "BigDecimal purchasePrice",
+        "BigDecimal salePrice",
+        "BigDecimal ivaRate",
+        "String category",
+        "String imageUrl",
+        "boolean active = true"
+      ]
+    },
+    {
+      "file": "services/customer-service/src/main/java/com/uelbosque/customerservice/Customer.java",
+      "class": "Customer",
+      "table": "customers",
+      "fields": [
+        "String name",
+        "String address",
+        "String phone",
+        "String email"
+      ]
+    },
+    {
+      "file": "services/inventory-service/src/main/java/com/uelbosque/inventoryservice/Reservation.java",
+      "class": "Reservation",
+      "table": "reservations",
+      "fields": [
+        "String productCode",
+        "int quantity",
+        "String status=\"RESERVED\""
+      ]
+    },
+    {
+      "file": "services/inventory-service/src/main/java/com/uelbosque/inventoryservice/Stock.java",
+      "class": "Stock",
+      "table": "stock",
+      "fields": [
+        "int available",
+        "int reserved"
+      ]
+    },
+    {
+      "file": "services/notification-service/src/main/java/com/uelbosque/notificationservice/Notification.java",
+      "class": "Notification",
+      "table": "notifications",
+      "fields": [
+        "String recipient",
+        "String subject",
+        "String status=\"PENDING\"",
+        "int attempts"
+      ]
+    },
+    {
+      "file": "services/order-service/src/main/java/com/uelbosque/orderservice/Sale.java",
+      "class": "Sale",
+      "table": "sales",
+      "fields": [
+        "String customerName",
+        "String username"
+      ]
+    },
+    {
+      "file": "services/order-service/src/main/java/com/uelbosque/orderservice/model/Order.java",
+      "class": "Order",
+      "table": "orders",
+      "fields": [
+        "Long id",
+        "String orderNumber",
+        "String userId",
+        "String customerName",
+        "String customerEmail",
+        "String shippingAddress",
+        "OrderStatus status = OrderStatus.PENDING",
+        "BigDecimal subtotal = BigDecimal.ZERO",
+        "BigDecimal taxTotal = BigDecimal.ZERO",
+        "BigDecimal discountTotal = BigDecimal.ZERO",
+        "BigDecimal grandTotal = BigDecimal.ZERO"
+      ]
+    },
+    {
+      "file": "services/order-service/src/main/java/com/uelbosque/orderservice/model/OrderItem.java",
+      "class": "OrderItem",
+      "table": "order_items",
+      "fields": [
+        "Long id",
+        "Order order",
+        "String productCode",
+        "String productName",
+        "BigDecimal unitPrice",
+        "Integer quantity",
+        "BigDecimal itemSubtotal"
+      ]
+    },
+    {
+      "file": "services/payment-service/src/main/java/com/uelbosque/paymentservice/Payment.java",
+      "class": "Payment",
+      "table": "payments",
+      "fields": [
+        "Long saleId",
+        "String status",
+        "boolean simulated=true"
+      ]
+    },
+    {
+      "file": "services/supplier-service/src/main/java/com/uelbosque/supplierservice/Supplier.java",
+      "class": "Supplier",
+      "table": "suppliers",
+      "fields": [
+        "String name",
+        "String address",
+        "String phone",
+        "String city"
+      ]
+    },
+    {
+      "file": "services/user-service/src/main/java/com/uelbosque/userservice/model/User.java",
+      "class": "User",
+      "table": "users",
+      "fields": [
+        "Long id",
+        "String username",
+        "String password",
+        "String name",
+        "String email",
+        "String roles",
+        "boolean enabled = true"
+      ]
+    }
+  ],
+  "controllers": [
+    {
+      "file": "services/admin-service/src/main/java/com/uelbosque/adminservice/ReportController.java",
+      "class": "ReportController",
+      "base": "",
+      "endpoints": [
+        "GET ",
+        "GET /users",
+        "GET /customers",
+        "GET /sales-by-customer"
+      ]
+    },
+    {
+      "file": "services/cart-service/src/main/java/com/uelbosque/cartservice/controller/CartController.java",
+      "class": "CartController",
+      "base": "/api/cart",
+      "endpoints": [
+        "GET /api/cart/{userId}",
+        "POST /api/cart/{userId}/items",
+        "PUT /api/cart/{userId}/items/{productCode}",
+        "DELETE /api/cart/{userId}/items/{productCode}",
+        "DELETE /api/cart/{userId}",
+        "POST /api/cart/{userId}/discount"
+      ]
+    },
+    {
+      "file": "services/cart-service/src/main/java/com/uelbosque/cartservice/exception/GlobalExceptionHandler.java",
+      "class": "GlobalExceptionHandler",
+      "base": "",
+      "endpoints": []
+    },
+    {
+      "file": "services/catalog-service/src/main/java/com/uelbosque/catalogservice/ProductImportController.java",
+      "class": "ProductImportController",
+      "base": "",
+      "endpoints": [
+        "POST /api/products/import"
+      ]
+    },
+    {
+      "file": "services/catalog-service/src/main/java/com/uelbosque/catalogservice/controller/ProductController.java",
+      "class": "ProductController",
+      "base": "/api/products",
+      "endpoints": [
+        "POST /api/products",
+        "GET /api/products",
+        "GET /api/products/categories",
+        "GET /api/products/{id}",
+        "GET /api/products/code/{code}",
+        "PUT /api/products/{id}",
+        "DELETE /api/products/{id}"
+      ]
+    },
+    {
+      "file": "services/catalog-service/src/main/java/com/uelbosque/catalogservice/exception/GlobalExceptionHandler.java",
+      "class": "GlobalExceptionHandler",
+      "base": "",
+      "endpoints": []
+    },
+    {
+      "file": "services/customer-service/src/main/java/com/uelbosque/customerservice/CustomerController.java",
+      "class": "CustomerController",
+      "base": "/api/customers",
+      "endpoints": [
+        "POST /api/customers",
+        "GET /api/customers",
+        "GET /api/customers/{id}",
+        "PUT /api/customers/{id}",
+        "DELETE /api/customers/{id}"
+      ]
+    },
+    {
+      "file": "services/gateway/src/main/java/com/uelbosque/gateway/controller/GatewayHealthController.java",
+      "class": "GatewayHealthController",
+      "base": "",
+      "endpoints": [
+        "GET /api/gateway/health",
+        "GET /fallback"
+      ]
+    },
+    {
+      "file": "services/inventory-service/src/main/java/com/uelbosque/inventoryservice/InventoryController.java",
+      "class": "InventoryController",
+      "base": "/api/inventory",
+      "endpoints": [
+        "GET /api/inventory",
+        "GET /api/inventory/{code}",
+        "PUT /api/inventory/{code}",
+        "POST /api/inventory/reservations",
+        "POST /api/inventory/reservations/{key}/commit",
+        "POST /api/inventory/reservations/{key}/release"
+      ]
+    },
+    {
+      "file": "services/notification-service/src/main/java/com/uelbosque/notificationservice/NotificationController.java",
+      "class": "NotificationController",
+      "base": "/api/notifications",
+      "endpoints": [
+        "POST /api/notifications",
+        "GET /api/notifications",
+        "GET /api/notifications/{key}",
+        "POST /api/notifications/{key}/send"
+      ]
+    },
+    {
+      "file": "services/order-service/src/main/java/com/uelbosque/orderservice/SaleController.java",
+      "class": "SaleController",
+      "base": "/api/sales",
+      "endpoints": [
+        "POST /api/sales",
+        "GET /api/sales",
+        "GET /api/sales/{id}"
+      ]
+    },
+    {
+      "file": "services/order-service/src/main/java/com/uelbosque/orderservice/controller/OrderController.java",
+      "class": "OrderController",
+      "base": "/api/orders",
+      "endpoints": [
+        "POST /api/orders",
+        "GET /api/orders/{id}",
+        "GET /api/orders/number/{orderNumber}",
+        "GET /api/orders/user/{userId}",
+        "GET /api/orders",
+        "PUT /api/orders/{id}/status",
+        "PUT /api/orders/{id}/cancel"
+      ]
+    },
+    {
+      "file": "services/order-service/src/main/java/com/uelbosque/orderservice/exception/GlobalExceptionHandler.java",
+      "class": "GlobalExceptionHandler",
+      "base": "",
+      "endpoints": []
+    },
+    {
+      "file": "services/payment-service/src/main/java/com/uelbosque/paymentservice/PaymentController.java",
+      "class": "PaymentController",
+      "base": "/api/payments",
+      "endpoints": [
+        "POST /api/payments",
+        "GET /api/payments",
+        "GET /api/payments/{key}"
+      ]
+    },
+    {
+      "file": "services/platform-common/src/main/java/com/uelbosque/platformcommon/ApiErrors.java",
+      "class": "ApiErrors",
+      "base": "",
+      "endpoints": []
+    },
+    {
+      "file": "services/platform-common/test/com/uelbosque/platformcommon/ApiSecurityTest.java",
+      "class": "ApiSecurityTest",
+      "base": "",
+      "endpoints": [
+        "GET /api/probe",
+        "POST /api/probe"
+      ]
+    },
+    {
+      "file": "services/supplier-service/src/main/java/com/uelbosque/supplierservice/SupplierController.java",
+      "class": "SupplierController",
+      "base": "/api/suppliers",
+      "endpoints": [
+        "POST /api/suppliers",
+        "GET /api/suppliers",
+        "GET /api/suppliers/{id}",
+        "PUT /api/suppliers/{id}",
+        "DELETE /api/suppliers/{id}"
+      ]
+    },
+    {
+      "file": "services/user-service/src/main/java/com/uelbosque/userservice/controller/UserController.java",
+      "class": "UserController",
+      "base": "/api/users",
+      "endpoints": [
+        "POST /api/users",
+        "POST /api/users/login",
+        "GET /api/users",
+        "GET /api/users/cedula/{cedula}",
+        "GET /api/users/{id}",
+        "GET /api/users/username/{username}",
+        "PUT /api/users/{id}",
+        "DELETE /api/users/{id}"
+      ]
+    },
+    {
+      "file": "services/user-service/src/main/java/com/uelbosque/userservice/exception/GlobalExceptionHandler.java",
+      "class": "GlobalExceptionHandler",
+      "base": "",
+      "endpoints": []
+    }
+  ],
+  "http_clients": [
+    {
+      "file": "services/admin-service/src/main/java/com/uelbosque/adminservice/ReportClient.java",
+      "class": "ReportClient",
+      "urls": [
+        "http://localhost:8081}",
+        "http://localhost:8089}",
+        "http://localhost:8085}"
+      ]
+    },
+    {
+      "file": "services/cart-service/src/main/java/com/uelbosque/cartservice/CatalogReader.java",
+      "class": "CatalogReader",
+      "urls": [
+        "http://localhost:8082}"
+      ]
+    },
+    {
+      "file": "services/catalog-service/src/main/java/com/uelbosque/catalogservice/SupplierDirectory.java",
+      "class": "SupplierDirectory",
+      "urls": [
+        "http://localhost:8090}"
+      ]
+    },
+    {
+      "file": "services/order-service/src/main/java/com/uelbosque/orderservice/SaleDirectory.java",
+      "class": "SaleDirectory",
+      "urls": [
+        "http://localhost:8081}",
+        "http://localhost:8089}",
+        "http://localhost:8082}"
+      ]
+    },
+    {
+      "file": "services/order-service/test/com/uelbosque/orderservice/SalesApiTest.java",
+      "class": "SalesApiTest",
+      "urls": []
+    },
+    {
+      "file": "services/payment-service/src/main/java/com/uelbosque/paymentservice/SaleLookup.java",
+      "class": "SaleLookup",
+      "urls": [
+        "http://localhost:8085}"
+      ]
+    },
+    {
+      "file": "services/platform-common/src/main/java/com/uelbosque/platformcommon/PlatformConfiguration.java",
+      "class": "PlatformConfiguration",
+      "urls": []
+    }
+  ]
+}
