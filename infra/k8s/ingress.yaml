@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tienda-generica
+  labels:
+    app.kubernetes.io/name: tienda-generica-ingress
+    app.kubernetes.io/part-of: tienda-generica
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 5m
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tienda-frontend
+                port:
+                  number: 80

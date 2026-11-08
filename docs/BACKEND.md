@@ -45,10 +45,29 @@ Todos los manifiestos Kubernetes viven en `.\infra\k8s\`.
 ./scripts/k8s-apply.ps1
 ```
 
-Servicios expuestos para desarrollo local:
+Para exponer frontend y API se usa Ingress (`infra/k8s/ingress.yaml`) con
+enrutamiento por path:
 
-- Gateway: `http://localhost:30080` (`gateway-external`, NodePort).
-- Frontend: `http://localhost:30420` (`tienda-frontend-external`, NodePort).
+- `/api` -> `gateway:8080`
+- `/` -> `tienda-frontend:80`
+
+Si tu cluster no tiene controlador Ingress, instala uno (por ejemplo
+ingress-nginx) antes de aplicar:
+
+```powershell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0/deploy/static/provider/cloud/deploy.yaml
+```
+
+Con ingress-nginx en local, puedes abrir un endpoint local con port-forward:
+
+```powershell
+kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller 8080:80
+```
+
+Acceso local:
+
+- Frontend: `http://localhost:8080/`
+- API (gateway): `http://localhost:8080/api`
 
 Comprobaciones utiles:
 
@@ -56,6 +75,7 @@ Comprobaciones utiles:
 kubectl -n tienda-generica get pods
 kubectl -n tienda-generica get deploy
 kubectl -n tienda-generica get svc
+kubectl -n tienda-generica get ingress
 ```
 
 En Kubernetes, cada servicio de aplicacion stateless (config-server, dominio, gateway y frontend) se despliega con 2 replicas. PostgreSQL se despliega con una sola replica stateful y volumen persistente (`StatefulSet`) para preservar consistencia y datos.

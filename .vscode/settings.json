@@ -4,7 +4,9 @@
         "docker compose": true,
         "kubectl kustomize": true,
         "kubectl apply": true,
-        "kubectl cluster-info": true
+        "kubectl cluster-info": true,
+        "kubectl -n tienda-generica": true,
+        "kubectl delete": true
     },
     "chat.instructionsFilesLocations": {
         ".copilot/instructions": true

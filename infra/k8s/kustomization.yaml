@@ -9,4 +9,4 @@ resources:
   - business-services.yaml
   - gateway.yaml
   - frontend.yaml
-  - external-access.yaml
+  - ingress.yaml
