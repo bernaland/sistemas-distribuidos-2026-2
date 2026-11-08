@@ -23,6 +23,49 @@ Cada microservicio corre con dos instancias (`{servicio}-1` y `{servicio}-2`) de
 
 Se usa PostgreSQL 18.6. El volumen conserva los datos al detener los contenedores. El script de inicialización crea una base y un rol propietario por dominio y restringe las conexiones entre bases. Hibernate `ddl-auto: update` permite iniciar este proyecto académico; un despliegue con datos de producción debe usar migraciones versionadas antes de cambiar esquemas existentes.
 
+## Inicio con Kubernetes
+
+Todos los manifiestos Kubernetes viven en `.\infra\k8s\`.
+
+1. Generar entorno local si no existe:
+
+```powershell
+./scripts/setup-env.ps1
+```
+
+2. Crear/actualizar el Secret de Kubernetes a partir de `.env`:
+
+```powershell
+./scripts/k8s-create-secret.ps1
+```
+
+3. Aplicar manifiestos:
+
+```powershell
+./scripts/k8s-apply.ps1
+```
+
+Servicios expuestos para desarrollo local:
+
+- Gateway: `http://localhost:30080` (`gateway-external`, NodePort).
+- Frontend: `http://localhost:30420` (`tienda-frontend-external`, NodePort).
+
+Comprobaciones utiles:
+
+```powershell
+kubectl -n tienda-generica get pods
+kubectl -n tienda-generica get deploy
+kubectl -n tienda-generica get svc
+```
+
+En Kubernetes, cada servicio de aplicacion stateless (config-server, dominio, gateway y frontend) se despliega con 2 replicas. PostgreSQL se despliega con una sola replica stateful y volumen persistente (`StatefulSet`) para preservar consistencia y datos.
+
+Para eliminar el stack:
+
+```powershell
+./scripts/k8s-delete.ps1
+```
+
 ## Compilación y pruebas
 
 Con Java 17 o superior (`JAVA_HOME` configurado). El wrapper descarga Maven 3.9.9 si hace falta:

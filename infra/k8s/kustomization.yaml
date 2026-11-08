@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tienda-generica
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - postgres.yaml
+  - config-server.yaml
+  - business-services.yaml
+  - gateway.yaml
+  - frontend.yaml
+  - external-access.yaml
