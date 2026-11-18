@@ -17,7 +17,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
       display: inline-block;
     }
   `],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true
 })
 export class LabelAtom {

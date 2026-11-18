@@ -34,7 +34,7 @@ spec:
       containers:
         - name: tienda-frontend
           image: tienda-generica-frontend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http

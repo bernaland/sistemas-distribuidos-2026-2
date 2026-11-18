@@ -27,7 +27,7 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
       transform: scale(0.98) translateY(0) !important;
     }
   `],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true
 })
 export class ButtonAtom {

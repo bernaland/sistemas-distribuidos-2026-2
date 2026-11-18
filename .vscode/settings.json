@@ -17,7 +17,10 @@
         "kubectl auth": true,
         "where.exe": true,
         "gcloud": true,
-        "kubectl describe": true
+        "kubectl describe": true,
+        "npm run build": true,
+        "docker push": true,
+        "kubectl rollout": true
     },
     "chat.instructionsFilesLocations": {
         ".copilot/instructions": true
