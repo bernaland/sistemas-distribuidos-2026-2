@@ -85,7 +85,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8081
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -177,7 +177,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8082
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -269,7 +269,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8083
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -361,7 +361,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8084
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -453,7 +453,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8085
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -545,7 +545,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8086
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -637,7 +637,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8087
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -720,7 +720,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8088
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -812,7 +812,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8089
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
@@ -904,7 +904,7 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8090
-            initialDelaySeconds: 50
+            initialDelaySeconds: 180
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6

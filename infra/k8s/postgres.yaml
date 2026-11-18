@@ -97,21 +97,14 @@ spec:
             failureThreshold: 6
           volumeMounts:
             - name: postgres-data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
             - name: postgres-init
               mountPath: /docker-entrypoint-initdb.d/init-databases.sh
               subPath: init-databases.sh
       volumes:
+        - name: postgres-data
+          emptyDir: {}
         - name: postgres-init
           configMap:
             name: postgres-init
             defaultMode: 0555
-  volumeClaimTemplates:
-    - metadata:
-        name: postgres-data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 5Gi

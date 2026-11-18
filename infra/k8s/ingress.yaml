@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: tienda-generica-ingress
     app.kubernetes.io/part-of: tienda-generica
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: 5m
+    kubernetes.io/ingress.class: gce
 spec:
   rules:
     - http:

@@ -2,7 +2,7 @@ FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
 WORKDIR /workspace
 COPY services/ services/
 RUN mvn -B -f services/pom.xml package -DskipTests
-FROM eclipse-temurin:17-jre-alpine
+FROM bellsoft/liberica-runtime-container:jre-17-musl
 ARG SERVICE
 WORKDIR /app
 COPY --from=build /workspace/services/${SERVICE}/target/*.jar app.jar

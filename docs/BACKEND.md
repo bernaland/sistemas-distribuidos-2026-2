@@ -45,29 +45,34 @@ Todos los manifiestos Kubernetes viven en `.\infra\k8s\`.
 ./scripts/k8s-apply.ps1
 ```
 
-Para exponer frontend y API se usa Ingress (`infra/k8s/ingress.yaml`) con
-enrutamiento por path:
+`k8s-apply.ps1` ahora construye siempre las imagenes primero dentro del runtime
+de Minikube (`scripts/k8s-build-images-minikube.ps1`, usando `minikube image build`)
+y luego aplica los manifiestos. Esto evita transferencias lentas con
+`minikube image load`.
+
+Para exponer frontend y API en GKE se usa el Ingress nativo de Google Cloud
+(`infra/k8s/ingress.yaml`, clase `gce`) con enrutamiento por path:
 
 - `/api` -> `gateway:8080`
 - `/` -> `tienda-frontend:80`
 
-Si tu cluster no tiene controlador Ingress, instala uno (por ejemplo
-ingress-nginx) antes de aplicar:
+GKE crea un balanceador externo para este recurso. Consulta la IP asignada con:
 
 ```powershell
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0/deploy/static/provider/cloud/deploy.yaml
+kubectl -n tienda-generica get ingress tienda-generica
 ```
 
-Con ingress-nginx en local, puedes abrir un endpoint local con port-forward:
+La clase `gce` no requiere instalar un controlador Ingress adicional en el cluster.
+
+Para GKE, las imagenes se construyen y publican en Artifact Registry con:
 
 ```powershell
-kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller 8080:80
+gcloud auth configure-docker us-east4-docker.pkg.dev
+./scripts/k8s-build-images-gcp.ps1
 ```
 
-Acceso local:
-
-- Frontend: `http://localhost:8080/`
-- API (gateway): `http://localhost:8080/api`
+Kustomize reemplaza los nombres locales por las imagenes publicadas en:
+`us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos`.
 
 Comprobaciones utiles:
 
@@ -78,7 +83,7 @@ kubectl -n tienda-generica get svc
 kubectl -n tienda-generica get ingress
 ```
 
-En Kubernetes, cada servicio de aplicacion stateless (config-server, dominio, gateway y frontend) se despliega con 2 replicas. PostgreSQL se despliega con una sola replica stateful y volumen persistente (`StatefulSet`) para preservar consistencia y datos.
+En Kubernetes, cada servicio de aplicacion stateless (config-server, dominio, gateway y frontend) se despliega con 2 replicas. PostgreSQL se despliega con una sola replica (`StatefulSet`). En el cluster GKE de pruebas usa `emptyDir` para evitar restricciones de compatibilidad del disco; los datos se pierden al recrear el pod. Para un entorno persistente se debe reemplazar por un PVC compatible con el tipo de nodo.
 
 Para eliminar el stack:
 

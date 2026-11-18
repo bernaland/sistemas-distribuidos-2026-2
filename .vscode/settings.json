@@ -6,7 +6,18 @@
         "kubectl apply": true,
         "kubectl cluster-info": true,
         "kubectl -n tienda-generica": true,
-        "kubectl delete": true
+        "kubectl delete": true,
+        "kubectl -n ingress-nginx": true,
+        "minikube": true,
+        "docker history": true,
+        "docker build": true,
+        "docker pull": true,
+        "kubectl config": true,
+        "kubectl get": true,
+        "kubectl auth": true,
+        "where.exe": true,
+        "gcloud": true,
+        "kubectl describe": true
     },
     "chat.instructionsFilesLocations": {
         ".copilot/instructions": true
