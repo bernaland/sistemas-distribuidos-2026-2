@@ -1,0 +1,52 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tienda-generica
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - postgres.yaml
+  - config-server.yaml
+  - business-services.yaml
+  - gateway.yaml
+  - frontend.yaml
+  - ingress.yaml
+images:
+  - name: tienda-generica-config-server
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/config-server
+    newTag: latest
+  - name: tienda-generica-user-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/user-service
+    newTag: latest
+  - name: tienda-generica-catalog-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/catalog-service
+    newTag: latest
+  - name: tienda-generica-inventory-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/inventory-service
+    newTag: latest
+  - name: tienda-generica-cart-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/cart-service
+    newTag: latest
+  - name: tienda-generica-order-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/order-service
+    newTag: latest
+  - name: tienda-generica-payment-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/payment-service
+    newTag: latest
+  - name: tienda-generica-notification-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/notification-service
+    newTag: latest
+  - name: tienda-generica-admin-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/admin-service
+    newTag: latest
+  - name: tienda-generica-customer-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/customer-service
+    newTag: latest
+  - name: tienda-generica-supplier-service
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/supplier-service
+    newTag: latest
+  - name: tienda-generica-gateway
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/gateway
+    newTag: latest
+  - name: tienda-generica-frontend
+    newName: us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos/frontend
+    newTag: latest

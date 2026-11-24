@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tienda-generica-config
+  labels:
+    app.kubernetes.io/part-of: tienda-generica
+data:
+  SPRING_PROFILES_ACTIVE: distributed
+  CONFIG_SERVER_URL: http://config-server:8888
+  SPRING_CLOUD_CONFIG_USERNAME: config
+  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "3"
+  SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: "1"
+  SERVICES_USERS: http://user-service:8081
+  SERVICES_CUSTOMERS: http://customer-service:8089
+  SERVICES_SUPPLIERS: http://supplier-service:8090
+  SERVICES_PRODUCTS: http://catalog-service:8082
+  SERVICES_ORDERS: http://order-service:8085
+  USER_SERVICE_URL: http://user-service:8081
+  CATALOG_SERVICE_URL: http://catalog-service:8082
+  INVENTORY_SERVICE_URL: http://inventory-service:8083
+  CART_SERVICE_URL: http://cart-service:8084
+  ORDER_SERVICE_URL: http://order-service:8085
+  PAYMENT_SERVICE_URL: http://payment-service:8086
+  NOTIFICATION_SERVICE_URL: http://notification-service:8087
+  ADMIN_SERVICE_URL: http://admin-service:8088
+  CUSTOMER_SERVICE_URL: http://customer-service:8089
+  SUPPLIER_SERVICE_URL: http://supplier-service:8090

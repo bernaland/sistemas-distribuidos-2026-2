@@ -35,7 +35,7 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
       padding-left: 2.4rem !important;
     }
   `],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true
 })
 export class InputAtom {

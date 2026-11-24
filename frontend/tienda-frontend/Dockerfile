@@ -1,7 +1,7 @@
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY frontend/tienda-frontend/package*.json ./
-RUN npm ci
+RUN npm install --no-audit --no-fund
 COPY frontend/tienda-frontend/ ./
 RUN npm run build
 

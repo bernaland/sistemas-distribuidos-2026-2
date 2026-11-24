@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tienda-frontend
+  labels:
+    app.kubernetes.io/name: tienda-frontend
+    app.kubernetes.io/part-of: tienda-generica
+spec:
+  selector:
+    app.kubernetes.io/name: tienda-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tienda-frontend
+  labels:
+    app.kubernetes.io/name: tienda-frontend
+    app.kubernetes.io/part-of: tienda-generica
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tienda-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tienda-frontend
+        app.kubernetes.io/part-of: tienda-generica
+    spec:
+      containers:
+        - name: tienda-frontend
+          image: tienda-generica-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 6

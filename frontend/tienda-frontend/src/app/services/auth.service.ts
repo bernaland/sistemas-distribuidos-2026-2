@@ -36,11 +36,8 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    if (this.isTokenExpired()) {
-      this.logout();
-      return null;
-    }
-    return this.tokenSignal();
+    const token = this.tokenSignal();
+    return token && !this.isTokenExpired() ? token : null;
   }
 
   getCurrentUser(): User | null {
@@ -96,4 +93,3 @@ export class AuthService {
     return raw ? JSON.parse(raw) : null;
   }
 }
-

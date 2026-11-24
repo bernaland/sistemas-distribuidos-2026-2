@@ -26,7 +26,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
       width: 100%;
     }
   `],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true
 })
 export class FormRowMolecule {

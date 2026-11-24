@@ -23,6 +23,74 @@ Cada microservicio corre con dos instancias (`{servicio}-1` y `{servicio}-2`) de
 
 Se usa PostgreSQL 18.6. El volumen conserva los datos al detener los contenedores. El script de inicialización crea una base y un rol propietario por dominio y restringe las conexiones entre bases. Hibernate `ddl-auto: update` permite iniciar este proyecto académico; un despliegue con datos de producción debe usar migraciones versionadas antes de cambiar esquemas existentes.
 
+## Inicio con Kubernetes
+
+Todos los manifiestos Kubernetes viven en `.\infra\k8s\`.
+
+1. Generar entorno local si no existe:
+
+```powershell
+./scripts/setup-env.ps1
+```
+
+2. Crear/actualizar el Secret de Kubernetes a partir de `.env`:
+
+```powershell
+./scripts/k8s-create-secret.ps1
+```
+
+3. Aplicar manifiestos:
+
+```powershell
+./scripts/k8s-apply.ps1
+```
+
+`k8s-apply.ps1` ahora construye siempre las imagenes primero dentro del runtime
+de Minikube (`scripts/k8s-build-images-minikube.ps1`, usando `minikube image build`)
+y luego aplica los manifiestos. Esto evita transferencias lentas con
+`minikube image load`.
+
+Para exponer frontend y API en GKE se usa el Ingress nativo de Google Cloud
+(`infra/k8s/ingress.yaml`, clase `gce`) con enrutamiento por path:
+
+- `/api` -> `gateway:8080`
+- `/` -> `tienda-frontend:80`
+
+GKE crea un balanceador externo para este recurso. Consulta la IP asignada con:
+
+```powershell
+kubectl -n tienda-generica get ingress tienda-generica
+```
+
+La clase `gce` no requiere instalar un controlador Ingress adicional en el cluster.
+
+Para GKE, las imagenes se construyen y publican en Artifact Registry con:
+
+```powershell
+gcloud auth configure-docker us-east4-docker.pkg.dev
+./scripts/k8s-build-images-gcp.ps1
+```
+
+Kustomize reemplaza los nombres locales por las imagenes publicadas en:
+`us-east4-docker.pkg.dev/project-f32623f8-beb2-4c0a-9c5/sistemas-distribuidos`.
+
+Comprobaciones utiles:
+
+```powershell
+kubectl -n tienda-generica get pods
+kubectl -n tienda-generica get deploy
+kubectl -n tienda-generica get svc
+kubectl -n tienda-generica get ingress
+```
+
+En Kubernetes, cada servicio de aplicacion stateless (config-server, dominio, gateway y frontend) se despliega con 2 replicas. PostgreSQL se despliega con una sola replica (`StatefulSet`). En el cluster GKE de pruebas usa `emptyDir` para evitar restricciones de compatibilidad del disco; los datos se pierden al recrear el pod. Para un entorno persistente se debe reemplazar por un PVC compatible con el tipo de nodo.
+
+Para eliminar el stack:
+
+```powershell
+./scripts/k8s-delete.ps1
+```
+
 ## Compilación y pruebas
 
 Con Java 17 o superior (`JAVA_HOME` configurado). El wrapper descarga Maven 3.9.9 si hace falta:
